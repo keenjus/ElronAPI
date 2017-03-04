@@ -18,9 +18,9 @@ namespace ElronAPI.Models
             _context.SaveChanges();
         }
 
-        public void Remove(string number)
+        public void Remove(string id)
         {
-            var entity = _context.ElronAccounts.First(i => i.Number == number);
+            var entity = _context.ElronAccounts.First(i => i.Id == id);
             _context.ElronAccounts.Remove(entity);
             _context.SaveChanges();
         }
@@ -36,9 +36,9 @@ namespace ElronAPI.Models
             return _context.ElronAccounts.ToList();
         }
 
-        public ElronAccount Find(string number)
+        public ElronAccount Find(string id)
         {
-            return _context.ElronAccounts.FirstOrDefault(i => i.Number == number);
+            return _context.ElronAccounts.FirstOrDefault(i => i.Id == id);
         }
     }
 }

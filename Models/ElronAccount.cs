@@ -6,7 +6,7 @@ namespace ElronAPI.Models
     public class ElronAccount
     {
         [Key]
-        public string Number { get; set; }
+        public string Id { get; set; }
         public decimal? Balance { get; set; }
     }
 }

@@ -14,38 +14,16 @@ namespace ElronAPI.Controllers
             _elronAccountsRepo = elronAccountsRepo;
         }
 
-        [HttpGet]
-        public IEnumerable<ElronAccount> GetAll()
-        {
-            return _elronAccountsRepo.GetAll();
-        }
-
-        [HttpGet("{id}")]
-        [Route("GetAccount")]
+        [HttpGet("{id}", Name = "GetAccount")]
         public IActionResult GetById(string id)
         {
             var item = _elronAccountsRepo.Find(id);
             if (item == null)
             {
-                return new JsonResult(new { });
+                Response.StatusCode = 404;
+                return new ObjectResult(new { error = true, message = "Failed to find the specified account." });
             }
             return new ObjectResult(item);
-        }
-
-        [HttpGet("add/{id}")]
-        public IActionResult AddById(string id)
-        {
-            bool success = false;
-            try
-            {
-                _elronAccountsRepo.Add(new ElronAccount(){ Number = id });
-                success = true;
-            }
-            catch (Exception ex)
-            {
-
-            }
-            return new JsonResult(new { error = !success });
         }
     }
 }

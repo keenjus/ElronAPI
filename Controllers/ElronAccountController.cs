@@ -94,6 +94,9 @@ namespace ElronAPI.Controllers
                 var sumNode = columns[3].SelectSingleNode("span");
 
                 transaction.Date = DateTime.ParseExact(dateNode.InnerText.Trim(), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+                transaction.Name = nameNode.InnerText.Trim();
+                transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim());
+
                 if (ticketNode != null)
                 {
                     var ticketNodeHrefValue = ticketNode.Attributes["href"].Value;
@@ -113,16 +116,12 @@ namespace ElronAPI.Controllers
 
                         account.PeriodTickets.Add(new ElronPeriodTicket()
                         {
-                            Ticket = ticket,
+                            Transaction = transaction,
                             ValidFrom = validFrom,
                             ValidTo = validTo
                         });
                     }
                 }
-
-                transaction.Name = nameNode.InnerText.Trim();
-
-                transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim());
 
                 account.Transactions.Add(transaction);
             }

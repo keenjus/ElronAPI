@@ -2,6 +2,7 @@ using System;
 using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Runtime.Serialization;
 
 namespace ElronAPI.Models
 {
@@ -46,7 +47,9 @@ namespace ElronAPI.Models
         [Key]
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
-        public ElronTicket Ticket { get; set; }
+        public long TransactionId { get; set; }
+        [IgnoreDataMemberAttribute]
+        public ElronTransaction Transaction { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
     }

@@ -3,6 +3,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
+using Newtonsoft.Json.Serialization;
 
 namespace ElronAPI
 {
@@ -11,7 +12,11 @@ namespace ElronAPI
         public void ConfigureServices(IServiceCollection services)
         {
             services.AddDbContext<ApplicationDb>(opt => opt.UseInMemoryDatabase());
-            services.AddMvc();
+            services.AddMvc().AddJsonOptions(options =>
+            {
+                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+            });
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

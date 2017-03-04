@@ -10,6 +10,8 @@ using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.WebUtilities;
 using Microsoft.EntityFrameworkCore;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
 namespace ElronAPI.Controllers
 {
@@ -38,7 +40,7 @@ namespace ElronAPI.Controllers
             {
                 if ((now - exists.LastCheck).Minutes < 15)
                 {
-                    return new ObjectResult(exists);
+                    return new JsonResult(exists);
                 }
                 _dbContext.ElronAccounts.Remove(exists);
                 _dbContext.SaveChanges();
@@ -67,7 +69,7 @@ namespace ElronAPI.Controllers
                 return ScrapeError("Failed to find balance value attribute.");
             }
             decimal balance;
-            if (!decimal.TryParse(valueAttribute.Value.Replace(",", "."), out balance))
+            if (!decimal.TryParse(valueAttribute.Value.Replace(",", "."), NumberStyles.Number, CultureInfo.InvariantCulture, out balance))
             {
                 return ScrapeError("Failed to parse balance.");
             }
@@ -94,13 +96,13 @@ namespace ElronAPI.Controllers
                 var sumNode = columns[3].SelectSingleNode("span");
 
                 transaction.Date = DateTime.ParseExact(dateNode.InnerText.Trim(), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-                transaction.Name = nameNode.InnerText.Trim();
-                transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim());
+                transaction.Name = nameNode.SelectSingleNode("text()").InnerText.Trim();
+                transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim(), NumberStyles.Number, CultureInfo.InvariantCulture);
 
                 if (ticketNode != null)
                 {
                     var ticketNodeHrefValue = ticketNode.Attributes["href"].Value;
-                    var ticketGuid = Guid.Parse(ticketNodeHrefValue.Substring(ticketNodeHrefValue.Length - 36, 36));
+                    var ticketGuid = Guid.Parse(ticketNodeHrefValue.Substring(ticketNodeHrefValue.Length - 36));
 
                     var ticket = new ElronTicket() { Id = ticketGuid, Number = ticketNode.InnerText.Trim(), Url = new Uri(new Uri("https://pilet.elron.ee/"), ticketNodeHrefValue).AbsoluteUri };
                     transaction.Ticket = ticket;
@@ -113,6 +115,8 @@ namespace ElronAPI.Controllers
 
                         var validFrom = DateTime.ParseExact(dateStrings[0], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
                         var validTo = DateTime.ParseExact(dateStrings[1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+
+                        transaction.Name += " " + validityNode.InnerText.Trim();
 
                         account.PeriodTickets.Add(new ElronPeriodTicket()
                         {
@@ -131,7 +135,7 @@ namespace ElronAPI.Controllers
             _dbContext.ElronAccounts.Add(account);
             _dbContext.SaveChanges();
 
-            return new ObjectResult(account);
+            return new JsonResult(account);
         }
 
         private IActionResult ScrapeError(string message)

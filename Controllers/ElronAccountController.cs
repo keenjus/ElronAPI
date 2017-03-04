@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
@@ -7,6 +8,8 @@ using System.Threading.Tasks;
 using ElronAPI.Models;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.AspNetCore.WebUtilities;
+using Microsoft.EntityFrameworkCore;
 
 namespace ElronAPI.Controllers
 {
@@ -22,12 +25,18 @@ namespace ElronAPI.Controllers
         }
 
         [HttpGet("{id}", Name = "GetAccount")]
-        public async Task<IActionResult> GetById(string id)
+        public async Task<IActionResult> GetById(string id, bool all = false)
         {
-            var exists = _dbContext.ElronAccounts.FirstOrDefault(e => e.Id == id);
+            var now = DateTime.Now;
+            var exists = _dbContext.ElronAccounts
+                            .Include(e => e.ActivePeriodTicket)
+                            .Include(e => e.PeriodTickets)
+                            .Include(e => e.Transactions)
+                            .ThenInclude(t => t.Ticket)
+                            .FirstOrDefault(e => e.Id == id);
             if (exists != null)
             {
-                if ((DateTime.UtcNow - exists.LastCheck).Minutes < 15)
+                if ((now - exists.LastCheck).Minutes < 15)
                 {
                     return new ObjectResult(exists);
                 }
@@ -36,6 +45,10 @@ namespace ElronAPI.Controllers
             }
 
             var result = await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
+            if (all)
+            {
+                result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
+            }
             result.EnsureSuccessStatusCode();
 
             string content = await result.Content.ReadAsStringAsync();
@@ -59,7 +72,63 @@ namespace ElronAPI.Controllers
                 return ScrapeError("Failed to parse balance.");
             }
 
-            var account = new ElronAccount() { Id = id, Balance = balance, LastCheck = DateTime.UtcNow };
+            var transactionsTableNode = doc.DocumentNode.SelectSingleNode("//*[@id=\"content\"]/section/section/section/section/section/div/table/tbody");
+            if (transactionsTableNode == null)
+            {
+                return ScrapeError("Failed to find transactions table node.");
+            }
+
+            var tableRows = transactionsTableNode.SelectNodes("tr");
+
+            var account = new ElronAccount() { Id = id, Balance = balance, LastCheck = now };
+
+            foreach (var tableRow in tableRows)
+            {
+                var transaction = new ElronTransaction();
+
+                var columns = tableRow.SelectNodes("td");
+
+                var dateNode = columns[0];
+                var ticketNode = columns[1].SelectSingleNode("a");
+                var nameNode = columns[2];
+                var sumNode = columns[3].SelectSingleNode("span");
+
+                transaction.Date = DateTime.ParseExact(dateNode.InnerText.Trim(), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+                if (ticketNode != null)
+                {
+                    var ticketNodeHrefValue = ticketNode.Attributes["href"].Value;
+                    var ticketGuid = Guid.Parse(ticketNodeHrefValue.Substring(ticketNodeHrefValue.Length - 36, 36));
+
+                    var ticket = new ElronTicket() { Id = ticketGuid, Number = ticketNode.InnerText.Trim(), Url = new Uri(new Uri("https://pilet.elron.ee/"), ticketNodeHrefValue).AbsoluteUri };
+                    transaction.Ticket = ticket;
+
+                    var validityNode = nameNode.SelectSingleNode("div[contains(@class, 'validity')]");
+                    if (validityNode != null)
+                    {
+                        string validityString = validityNode.InnerText.Trim().Substring(10);
+                        string[] dateStrings = validityString.Split('-').Select(d => d.Trim()).ToArray();
+
+                        var validFrom = DateTime.ParseExact(dateStrings[0], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+                        var validTo = DateTime.ParseExact(dateStrings[1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
+
+                        account.PeriodTickets.Add(new ElronPeriodTicket()
+                        {
+                            Ticket = ticket,
+                            ValidFrom = validFrom,
+                            ValidTo = validTo
+                        });
+                    }
+                }
+
+                transaction.Name = nameNode.InnerText.Trim();
+
+                transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim());
+
+                account.Transactions.Add(transaction);
+            }
+
+            account.ActivePeriodTicket = account.PeriodTickets.OrderByDescending(p => p.ValidFrom).Where(p => p.ValidTo > now).FirstOrDefault();
+
             _dbContext.ElronAccounts.Add(account);
             _dbContext.SaveChanges();
 

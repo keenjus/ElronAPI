@@ -12,7 +12,6 @@ namespace ElronAPI
         {
             services.AddDbContext<ApplicationDb>(opt => opt.UseInMemoryDatabase());
             services.AddMvc();
-            services.AddSingleton<IElronAccountRepository, ElronAccountRepository>();
         }
 
         public void Configure(IApplicationBuilder app, IHostingEnvironment env)

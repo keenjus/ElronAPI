@@ -30,7 +30,7 @@ namespace ElronAPI.Controllers
         public async Task<IActionResult> GetById(string id, bool all = false)
         {
             var now = DateTime.Now;
-            var exists = _dbContext.ElronAccounts
+            var exists = _dbContext.ElronAccount
                             .Include(e => e.ActivePeriodTicket)
                             .Include(e => e.PeriodTickets)
                             .Include(e => e.Transactions)
@@ -123,7 +123,7 @@ namespace ElronAPI.Controllers
                 account.ActivePeriodTicket = account.PeriodTickets.OrderByDescending(p => p.ValidFrom).Where(p => p.ValidTo > now).FirstOrDefault();
             }
 
-            _dbContext.ElronAccounts.Add(account);
+            _dbContext.ElronAccount.Add(account);
             _dbContext.SaveChanges();
 
             return new JsonResult(account);

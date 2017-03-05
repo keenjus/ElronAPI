@@ -8,14 +8,23 @@
     "Microsoft.AspNetCore.Mvc": "1.0.2",
     "Microsoft.AspNetCore.Server.Kestrel": "1.0.2",
     "Microsoft.EntityFrameworkCore.InMemory": "1.0.2",
+    "Microsoft.EntityFrameworkCore.Design": "1.1.0",
+    "Microsoft.EntityFrameworkCore.SqlServer": "1.1.0",
+    "Microsoft.EntityFrameworkCore.SqlServer.Design": {
+      "type": "build",
+      "version": "1.1.0"
+    },
     "Microsoft.Extensions.Configuration.EnvironmentVariables": "1.0.1",
     "Microsoft.Extensions.Configuration.FileExtensions": "1.0.1",
     "Microsoft.Extensions.Configuration.Json": "1.0.1",
-    "Microsoft.Extensions.Logging": "1.0.1",
+    "Microsoft.Extensions.Logging": "1.1.0",
     "Microsoft.Extensions.Logging.Console": "1.0.1",
     "Microsoft.Extensions.Logging.Debug": "1.0.1",
     "Microsoft.Extensions.Options.ConfigurationExtensions": "1.0.1",
     "HtmlAgilityPack.NetCore": "1.5.0.1"
+  },
+  "tools": {
+    "Microsoft.EntityFrameworkCore.Tools.DotNet": "1.1.0-preview4-final"
   },
   "frameworks": {
     "netcoreapp1.1": {

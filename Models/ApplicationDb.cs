@@ -20,6 +20,6 @@ namespace ElronAPI.Models
         //     optionsBuilder.UseSqlServer(@"Server=(localdb)\mssqllocaldb;Database=Test;Trusted_Connection=True;");
         // }
 
-        public DbSet<ElronAccount> ElronAccounts { get; set; }
+        public DbSet<ElronAccount> ElronAccount { get; set; }
     }
 }

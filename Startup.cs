@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Newtonsoft.Json.Serialization;
 using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Logging;
 
 namespace ElronAPI
 {
@@ -22,7 +23,7 @@ namespace ElronAPI
         
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDb>(opt => opt.UseSqlServer(Configuration.GetConnectionString("DefaultConnection")));
+            services.AddDbContext<ApplicationDb>(opt => opt.UseInMemoryDatabase());
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
@@ -30,9 +31,10 @@ namespace ElronAPI
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env)
+        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
         {
             app.UseMvc();
+            loggerFactory.AddConsole().AddDebug();
         }
     }
 }

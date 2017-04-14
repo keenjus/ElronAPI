@@ -20,6 +20,8 @@ namespace ElronAPI.Models
         public ElronPeriodTicket ActivePeriodTicket { get; set; }
         public List<ElronPeriodTicket> PeriodTickets { get; set; }
         public List<ElronTransaction> Transactions { get; set; }
+        public int? PeriodTicketThreshold { get; set; }
+        public decimal? BalanceThreshold { get; set; }
         public DateTime LastCheck { get; set; }
     }
 
@@ -29,6 +31,7 @@ namespace ElronAPI.Models
         [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
         public long Id { get; set; }
         public ElronTicket Ticket { get; set; }
+        public ElronPeriodTicket PeriodTicket { get; set; }
         public DateTime Date { get; set; }
         public string Name { get; set; }
         public decimal Sum { get; set; }

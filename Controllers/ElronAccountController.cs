@@ -42,10 +42,13 @@ namespace ElronAPI.Controllers
             }
 
             var result = await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
-            if (all)
-            {
-                result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
-            }
+            
+            // temporary
+            result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
+            // if (all)
+            // {
+            //     result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
+            // }
             result.EnsureSuccessStatusCode();
 
             string content = await result.Content.ReadAsStringAsync();
@@ -88,7 +91,7 @@ namespace ElronAPI.Controllers
                     var sumNode = columns[3].SelectSingleNode("span");
 
                     transaction.Date = DateTime.ParseExact(dateNode.InnerText.Trim(), "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
-                    transaction.Name = nameNode.SelectSingleNode("text()").InnerText.Trim();
+                    transaction.Name = WebUtility.HtmlDecode(nameNode.SelectSingleNode("text()").InnerText).Trim();
                     transaction.Sum = decimal.Parse(sumNode.InnerText.Replace(",", ".").Trim(), NumberStyles.Number, CultureInfo.InvariantCulture);
 
                     if (ticketNode != null)
@@ -108,7 +111,7 @@ namespace ElronAPI.Controllers
                             var validFrom = DateTime.ParseExact(dateStrings[0], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
                             var validTo = DateTime.ParseExact(dateStrings[1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 
-                            transaction.Name += " " + validityNode.InnerText.Trim();
+                            // transaction.Name += " " + validityNode.InnerText.Trim();
 
                             account.PeriodTickets.Add(new ElronPeriodTicket()
                             {

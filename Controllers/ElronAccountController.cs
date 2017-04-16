@@ -31,24 +31,18 @@ namespace ElronAPI.Controllers
         {
             var now = DateTime.Now;
             var exists = _dbContext.ElronAccount
-                            .Include(e => e.ActivePeriodTicket)
                             .Include(e => e.PeriodTickets)
                             .Include(e => e.Transactions)
                             .ThenInclude(t => t.Ticket)
                             .FirstOrDefault(e => e.Id == id);
             if (exists != null)
             {
-                return new JsonResult(exists);
+                return new JsonResult(SortAccountTransactions(exists));
             }
 
             var result = await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
-            
-            // temporary
             result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
-            // if (all)
-            // {
-            //     result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
-            // }
+
             result.EnsureSuccessStatusCode();
 
             string content = await result.Content.ReadAsStringAsync();
@@ -111,25 +105,33 @@ namespace ElronAPI.Controllers
                             var validFrom = DateTime.ParseExact(dateStrings[0], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
                             var validTo = DateTime.ParseExact(dateStrings[1], "dd.MM.yyyy HH:mm", CultureInfo.InvariantCulture);
 
-                            // transaction.Name += " " + validityNode.InnerText.Trim();
-
-                            account.PeriodTickets.Add(new ElronPeriodTicket()
+                            var periodTicket = new ElronPeriodTicket()
                             {
-                                Transaction = transaction,
                                 ValidFrom = validFrom,
                                 ValidTo = validTo
-                            });
+                            };
+
+                            transaction.PeriodTicket = periodTicket;
+                            account.PeriodTickets.Add(periodTicket);
                         }
                     }
                     account.Transactions.Add(transaction);
                 }
-                account.ActivePeriodTicket = account.PeriodTickets.OrderByDescending(p => p.ValidFrom).Where(p => p.ValidTo > now).FirstOrDefault();
             }
 
             _dbContext.ElronAccount.Add(account);
             _dbContext.SaveChanges();
 
-            return new JsonResult(account);
+            return new JsonResult(SortAccountTransactions(account));
+        }
+
+        public ElronAccount SortAccountTransactions(ElronAccount account)
+        {
+            if (account?.Transactions != null)
+            {
+                account.Transactions = account.Transactions.OrderByDescending(t => t.Date).ToList();
+            }
+            return account;
         }
 
         private IActionResult ScrapeError(string message)

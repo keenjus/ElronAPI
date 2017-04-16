@@ -23,7 +23,7 @@ namespace ElronAPI
         
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<ApplicationDb>(opt => opt.UseInMemoryDatabase());
+            services.AddDbContext<ApplicationDb>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Default")));
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;

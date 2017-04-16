@@ -8,29 +8,29 @@ using ElronAPI.Models;
 namespace ElronAPI.Migrations
 {
     [DbContext(typeof(ApplicationDb))]
-    [Migration("20170305132122_singularized ElronAccounts table")]
-    partial class singularizedElronAccountstable
+    [Migration("20170416134856_init")]
+    partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
             modelBuilder
-                .HasAnnotation("ProductVersion", "1.1.0-rtm-22752")
-                .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)
+                .HasAnnotation("ProductVersion", "1.1.1");
 
             modelBuilder.Entity("ElronAPI.Models.ElronAccount", b =>
                 {
                     b.Property<string>("Id")
                         .ValueGeneratedOnAdd();
 
-                    b.Property<long?>("ActivePeriodTicketId");
-
                     b.Property<decimal?>("Balance");
+
+                    b.Property<decimal?>("BalanceThreshold");
 
                     b.Property<DateTime>("LastCheck");
 
-                    b.HasKey("Id");
+                    b.Property<int?>("PeriodTicketThreshold");
 
-                    b.HasIndex("ActivePeriodTicketId");
+                    b.HasKey("Id");
 
                     b.ToTable("ElronAccount");
                 });
@@ -39,11 +39,9 @@ namespace ElronAPI.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
                     b.Property<string>("ElronAccountId");
-
-                    b.Property<long>("TransactionId");
 
                     b.Property<DateTime>("ValidFrom");
 
@@ -52,8 +50,6 @@ namespace ElronAPI.Migrations
                     b.HasKey("Id");
 
                     b.HasIndex("ElronAccountId");
-
-                    b.HasIndex("TransactionId");
 
                     b.ToTable("ElronPeriodTicket");
                 });
@@ -76,13 +72,15 @@ namespace ElronAPI.Migrations
                 {
                     b.Property<long>("Id")
                         .ValueGeneratedOnAdd()
-                        .HasAnnotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn);
+                        .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn);
 
                     b.Property<DateTime>("Date");
 
                     b.Property<string>("ElronAccountId");
 
                     b.Property<string>("Name");
+
+                    b.Property<long?>("PeriodTicketId");
 
                     b.Property<decimal>("Sum");
 
@@ -92,16 +90,11 @@ namespace ElronAPI.Migrations
 
                     b.HasIndex("ElronAccountId");
 
+                    b.HasIndex("PeriodTicketId");
+
                     b.HasIndex("TicketId");
 
                     b.ToTable("ElronTransaction");
-                });
-
-            modelBuilder.Entity("ElronAPI.Models.ElronAccount", b =>
-                {
-                    b.HasOne("ElronAPI.Models.ElronPeriodTicket", "ActivePeriodTicket")
-                        .WithMany()
-                        .HasForeignKey("ActivePeriodTicketId");
                 });
 
             modelBuilder.Entity("ElronAPI.Models.ElronPeriodTicket", b =>
@@ -109,11 +102,6 @@ namespace ElronAPI.Migrations
                     b.HasOne("ElronAPI.Models.ElronAccount")
                         .WithMany("PeriodTickets")
                         .HasForeignKey("ElronAccountId");
-
-                    b.HasOne("ElronAPI.Models.ElronTransaction", "Transaction")
-                        .WithMany()
-                        .HasForeignKey("TransactionId")
-                        .OnDelete(DeleteBehavior.Cascade);
                 });
 
             modelBuilder.Entity("ElronAPI.Models.ElronTransaction", b =>
@@ -121,6 +109,10 @@ namespace ElronAPI.Migrations
                     b.HasOne("ElronAPI.Models.ElronAccount")
                         .WithMany("Transactions")
                         .HasForeignKey("ElronAccountId");
+
+                    b.HasOne("ElronAPI.Models.ElronPeriodTicket", "PeriodTicket")
+                        .WithMany()
+                        .HasForeignKey("PeriodTicketId");
 
                     b.HasOne("ElronAPI.Models.ElronTicket", "Ticket")
                         .WithMany()

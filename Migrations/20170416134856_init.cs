@@ -10,6 +10,21 @@ namespace ElronAPI.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
+                name: "ElronAccount",
+                columns: table => new
+                {
+                    Id = table.Column<string>(nullable: false),
+                    Balance = table.Column<decimal>(nullable: true),
+                    BalanceThreshold = table.Column<decimal>(nullable: true),
+                    LastCheck = table.Column<DateTime>(nullable: false),
+                    PeriodTicketThreshold = table.Column<int>(nullable: true)
+                },
+                constraints: table =>
+                {
+                    table.PrimaryKey("PK_ElronAccount", x => x.Id);
+                });
+
+            migrationBuilder.CreateTable(
                 name: "ElronTicket",
                 columns: table => new
                 {
@@ -27,33 +42,18 @@ namespace ElronAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     ElronAccountId = table.Column<string>(nullable: true),
-                    TransactionId = table.Column<long>(nullable: false),
                     ValidFrom = table.Column<DateTime>(nullable: false),
                     ValidTo = table.Column<DateTime>(nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_ElronPeriodTicket", x => x.Id);
-                });
-
-            migrationBuilder.CreateTable(
-                name: "ElronAccounts",
-                columns: table => new
-                {
-                    Id = table.Column<string>(nullable: false),
-                    ActivePeriodTicketId = table.Column<long>(nullable: true),
-                    Balance = table.Column<decimal>(nullable: true),
-                    LastCheck = table.Column<DateTime>(nullable: false)
-                },
-                constraints: table =>
-                {
-                    table.PrimaryKey("PK_ElronAccounts", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ElronAccounts_ElronPeriodTicket_ActivePeriodTicketId",
-                        column: x => x.ActivePeriodTicketId,
-                        principalTable: "ElronPeriodTicket",
+                        name: "FK_ElronPeriodTicket_ElronAccount_ElronAccountId",
+                        column: x => x.ElronAccountId,
+                        principalTable: "ElronAccount",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                 });
@@ -63,10 +63,11 @@ namespace ElronAPI.Migrations
                 columns: table => new
                 {
                     Id = table.Column<long>(nullable: false)
-                        .Annotation("SqlServer:ValueGenerationStrategy", SqlServerValueGenerationStrategy.IdentityColumn),
+                        .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn),
                     Date = table.Column<DateTime>(nullable: false),
                     ElronAccountId = table.Column<string>(nullable: true),
                     Name = table.Column<string>(nullable: true),
+                    PeriodTicketId = table.Column<long>(nullable: true),
                     Sum = table.Column<decimal>(nullable: false),
                     TicketId = table.Column<Guid>(nullable: true)
                 },
@@ -74,9 +75,15 @@ namespace ElronAPI.Migrations
                 {
                     table.PrimaryKey("PK_ElronTransaction", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_ElronTransaction_ElronAccounts_ElronAccountId",
+                        name: "FK_ElronTransaction_ElronAccount_ElronAccountId",
                         column: x => x.ElronAccountId,
-                        principalTable: "ElronAccounts",
+                        principalTable: "ElronAccount",
+                        principalColumn: "Id",
+                        onDelete: ReferentialAction.Restrict);
+                    table.ForeignKey(
+                        name: "FK_ElronTransaction_ElronPeriodTicket_PeriodTicketId",
+                        column: x => x.PeriodTicketId,
+                        principalTable: "ElronPeriodTicket",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
@@ -88,19 +95,9 @@ namespace ElronAPI.Migrations
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_ElronAccounts_ActivePeriodTicketId",
-                table: "ElronAccounts",
-                column: "ActivePeriodTicketId");
-
-            migrationBuilder.CreateIndex(
                 name: "IX_ElronPeriodTicket_ElronAccountId",
                 table: "ElronPeriodTicket",
                 column: "ElronAccountId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_ElronPeriodTicket_TransactionId",
-                table: "ElronPeriodTicket",
-                column: "TransactionId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ElronTransaction_ElronAccountId",
@@ -108,44 +105,29 @@ namespace ElronAPI.Migrations
                 column: "ElronAccountId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_ElronTransaction_PeriodTicketId",
+                table: "ElronTransaction",
+                column: "PeriodTicketId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_ElronTransaction_TicketId",
                 table: "ElronTransaction",
                 column: "TicketId");
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ElronPeriodTicket_ElronAccounts_ElronAccountId",
-                table: "ElronPeriodTicket",
-                column: "ElronAccountId",
-                principalTable: "ElronAccounts",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Restrict);
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_ElronPeriodTicket_ElronTransaction_TransactionId",
-                table: "ElronPeriodTicket",
-                column: "TransactionId",
-                principalTable: "ElronTransaction",
-                principalColumn: "Id",
-                onDelete: ReferentialAction.Cascade);
         }
 
         protected override void Down(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_ElronAccounts_ElronPeriodTicket_ActivePeriodTicketId",
-                table: "ElronAccounts");
+            migrationBuilder.DropTable(
+                name: "ElronTransaction");
 
             migrationBuilder.DropTable(
                 name: "ElronPeriodTicket");
 
             migrationBuilder.DropTable(
-                name: "ElronTransaction");
-
-            migrationBuilder.DropTable(
-                name: "ElronAccounts");
-
-            migrationBuilder.DropTable(
                 name: "ElronTicket");
+
+            migrationBuilder.DropTable(
+                name: "ElronAccount");
         }
     }
 }

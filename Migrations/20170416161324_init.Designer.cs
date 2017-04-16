@@ -7,8 +7,8 @@ using ElronAPI.Models;
 
 namespace ElronAPI.Migrations
 {
-    [DbContext(typeof(ApplicationDb))]
-    [Migration("20170416134856_init")]
+    [DbContext(typeof(elronContext))]
+    [Migration("20170416161324_init")]
     partial class init
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)

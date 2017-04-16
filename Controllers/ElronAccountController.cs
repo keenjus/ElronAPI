@@ -19,8 +19,8 @@ namespace ElronAPI.Controllers
     public class ElronAccountController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly ApplicationDb _dbContext;
-        public ElronAccountController(ApplicationDb dbContext)
+        private readonly elronContext _dbContext;
+        public ElronAccountController(elronContext dbContext)
         {
             _httpClient = new HttpClient();
             _dbContext = dbContext;

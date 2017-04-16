@@ -7,8 +7,8 @@ using ElronAPI.Models;
 
 namespace ElronAPI.Migrations
 {
-    [DbContext(typeof(ApplicationDb))]
-    partial class ApplicationDbModelSnapshot : ModelSnapshot
+    [DbContext(typeof(elronContext))]
+    partial class elronContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)
         {

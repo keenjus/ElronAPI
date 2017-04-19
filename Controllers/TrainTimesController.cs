@@ -28,10 +28,11 @@ namespace ElronAPI.Controllers
 
         private object GetTrainTimes(string origin, string destination, bool all = false)
         {
-            var now = DateTime.Now.TimeOfDay;
+            var now = DateTime.Now;
+            var timeOfDay = now.TimeOfDay;
 
             var originStopTimes = _dbContext.StopTimes.Where(st => st.Stop.StopName.ToLower() == origin && st.Trip.Route.AgencyId == 82);
-            var destinationStopTimes = _dbContext.StopTimes.Where(st => st.Stop.StopName.ToLower() == destination && st.Trip.Route.AgencyId == 82);
+            var destinationStopTimes = _dbContext.StopTimes.Where(st => st.Stop.StopName.ToLower() == destination && st.Trip.Route.AgencyId == 82).Include(s => s.Trip);
 
             var times = (from originStopTime in originStopTimes
                          join destinationStopTime in destinationStopTimes
@@ -39,13 +40,54 @@ namespace ElronAPI.Controllers
                          where originStopTime.StopSequence < destinationStopTime.StopSequence
                          select new
                          {
+                             ServiceId = destinationStopTime.Trip.ServiceId,
                              Start = originStopTime.DepartureTime,
                              End = destinationStopTime.ArrivalTime
                          }).OrderBy(o => o.Start).ToList();
 
-            if(!all) times.RemoveAll(o => TimeSpan.Parse(o.Start) < now);
+            if(!all) times.RemoveAll(o => TimeSpan.Parse(o.Start) < timeOfDay);
+
+            for(int i = times.Count - 1; i >= 0; i--){
+                var time = times[i];
+                var calendar = _dbContext.Calendar.First(c => c.ServiceId == time.ServiceId);
+
+                if(!StopExistsOnDay(now.DayOfWeek, calendar)){
+                    times.RemoveAt(i);
+                    continue;
+                }
+
+                var startdate = DateTime.ParseExact(calendar.StartDate, "yyyyMMdd", null);
+                var enddate = DateTime.ParseExact(calendar.EndDate, "yyyyMMdd", null);
+
+                if((now < startdate || now > enddate)){
+                    times.RemoveAt(i);
+                }
+            }
 
             return times;
+        }
+
+        private bool StopExistsOnDay(DayOfWeek day, Calendar calendar)
+        {
+            switch(day)
+            {
+                case DayOfWeek.Monday:
+                    return calendar.Monday;
+                case DayOfWeek.Tuesday:
+                    return calendar.Tuesday;
+                case DayOfWeek.Wednesday:
+                    return calendar.Wednesday;
+                case DayOfWeek.Thursday:
+                    return calendar.Thursday;
+                case DayOfWeek.Friday:
+                    return calendar.Friday;
+                case DayOfWeek.Saturday:
+                    return calendar.Saturday;
+                case DayOfWeek.Sunday:
+                    return calendar.Sunday;
+                default:
+                    return false;
+            }
         }
     }
 }

@@ -7,6 +7,7 @@ namespace ElronAPI.Models
     public partial class peatusContext : DbContext
     {
         public virtual DbSet<Agency> Agencies { get; set; }
+        public virtual DbSet<Calendar> Calendar { get; set; }
         public virtual DbSet<Route> Routes { get; set; }
         public virtual DbSet<StopTime> StopTimes { get; set; }
         public virtual DbSet<Stop> Stops { get; set; }
@@ -54,6 +55,44 @@ namespace ElronAPI.Models
                     .HasColumnName("agency_url")
                     .HasColumnType("varchar")
                     .HasMaxLength(255);
+            });
+
+            modelBuilder.Entity<Calendar>(entity =>
+            {
+                entity.HasKey(e => e.ServiceId)
+                    .HasName("PK_calendar");
+
+                entity.ToTable("calendar");
+
+                entity.Property(e => e.ServiceId)
+                    .HasColumnName("service_id")
+                    .ValueGeneratedNever();
+
+                entity.Property(e => e.EndDate)
+                    .IsRequired()
+                    .HasColumnName("end_date")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(8);
+
+                entity.Property(e => e.Friday).HasColumnName("friday");
+
+                entity.Property(e => e.Monday).HasColumnName("monday");
+
+                entity.Property(e => e.Saturday).HasColumnName("saturday");
+
+                entity.Property(e => e.StartDate)
+                    .IsRequired()
+                    .HasColumnName("start_date")
+                    .HasColumnType("varchar")
+                    .HasMaxLength(8);
+
+                entity.Property(e => e.Sunday).HasColumnName("sunday");
+
+                entity.Property(e => e.Thursday).HasColumnName("thursday");
+
+                entity.Property(e => e.Tuesday).HasColumnName("tuesday");
+
+                entity.Property(e => e.Wednesday).HasColumnName("wednesday");
             });
 
             modelBuilder.Entity<Route>(entity =>

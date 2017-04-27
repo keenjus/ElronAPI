@@ -69,10 +69,8 @@ namespace ElronAPI.Models
                     .ValueGeneratedNever();
 
                 entity.Property(e => e.EndDate)
-                    .IsRequired()
                     .HasColumnName("end_date")
-                    .HasColumnType("varchar")
-                    .HasMaxLength(8);
+                    .HasColumnType("date");
 
                 entity.Property(e => e.Friday).HasColumnName("friday");
 
@@ -81,10 +79,8 @@ namespace ElronAPI.Models
                 entity.Property(e => e.Saturday).HasColumnName("saturday");
 
                 entity.Property(e => e.StartDate)
-                    .IsRequired()
                     .HasColumnName("start_date")
-                    .HasColumnType("varchar")
-                    .HasMaxLength(8);
+                    .HasColumnType("date");
 
                 entity.Property(e => e.Sunday).HasColumnName("sunday");
 

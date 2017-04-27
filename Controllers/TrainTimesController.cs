@@ -56,10 +56,7 @@ namespace ElronAPI.Controllers
                     continue;
                 }
 
-                var startdate = DateTime.ParseExact(calendar.StartDate, "yyyyMMdd", null);
-                var enddate = DateTime.ParseExact(calendar.EndDate, "yyyyMMdd", null);
-
-                if((now < startdate || now > enddate)){
+                if((now < calendar.StartDate || now > calendar.EndDate)){
                     times.RemoveAt(i);
                 }
             }

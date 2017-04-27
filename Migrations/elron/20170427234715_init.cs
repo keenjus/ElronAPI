@@ -3,7 +3,7 @@ using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Metadata;
 
-namespace ElronAPI.Migrations
+namespace ElronAPI.Migrations.elron
 {
     public partial class init : Migration
     {

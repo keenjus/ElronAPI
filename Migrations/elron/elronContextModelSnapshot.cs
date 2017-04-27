@@ -5,13 +5,12 @@ using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
 using ElronAPI.Models;
 
-namespace ElronAPI.Migrations
+namespace ElronAPI.Migrations.elron
 {
     [DbContext(typeof(elronContext))]
-    [Migration("20170416161324_init")]
-    partial class init
+    partial class elronContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)

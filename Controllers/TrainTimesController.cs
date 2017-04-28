@@ -41,6 +41,8 @@ namespace ElronAPI.Controllers
                          select new
                          {
                              ServiceId = destinationStopTime.Trip.ServiceId,
+                             RouteLongName = originStopTime.Trip.Route.RouteLongName,
+                             RouteShortName = originStopTime.Trip.Route.RouteShortName,
                              Start = originStopTime.DepartureTime,
                              End = destinationStopTime.ArrivalTime
                          }).OrderBy(o => o.Start).ToList();

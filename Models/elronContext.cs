@@ -9,7 +9,17 @@ namespace ElronAPI.Models
         {
 
         }
+
+        protected override void OnModelCreating(ModelBuilder modelBuilder)
+        {
+            modelBuilder.Entity<CachedAccount>(entity =>
+            {
+                entity.Property(e => e.Data)
+                    .IsRequired()
+                    .HasColumnType("json");
+            });
+        }
         
-        public DbSet<ElronAccount> ElronAccount { get; set; }
+        public DbSet<CachedAccount> CachedAccounts { get; set; }
     }
 }

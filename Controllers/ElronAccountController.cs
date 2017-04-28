@@ -30,14 +30,20 @@ namespace ElronAPI.Controllers
         public async Task<IActionResult> GetById(string id, bool all = false)
         {
             var now = DateTime.Now;
-            var exists = _dbContext.ElronAccount
-                            .Include(e => e.PeriodTickets)
-                            .Include(e => e.Transactions)
-                            .ThenInclude(t => t.Ticket)
-                            .FirstOrDefault(e => e.Id == id);
+
+            var exists = _dbContext.CachedAccounts.FirstOrDefault(ca => ca.Id == id.Trim());
+
             if (exists != null)
             {
-                return new JsonResult(SortAccountTransactions(exists));
+                if (exists.ExpireTime > now)
+                {
+                    return Content(exists.Data, "application/json");
+                }
+                else
+                {
+                    _dbContext.CachedAccounts.Remove(exists);
+                    _dbContext.SaveChanges();
+                }
             }
 
             var result = await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
@@ -119,7 +125,16 @@ namespace ElronAPI.Controllers
                 }
             }
 
-            _dbContext.ElronAccount.Add(account);
+            _dbContext.CachedAccounts.Add(new CachedAccount()
+            {
+                Id = id.Trim(),
+                Data = JsonConvert.SerializeObject(account, new JsonSerializerSettings
+                {
+                    ContractResolver = new CamelCasePropertyNamesContractResolver(),
+                    Formatting = Newtonsoft.Json.Formatting.Indented
+                }),
+                ExpireTime = DateTime.Now.AddMinutes(5)
+            });
             _dbContext.SaveChanges();
 
             return new JsonResult(SortAccountTransactions(account));

@@ -15,7 +15,6 @@ namespace ElronAPI.Models
             PeriodTickets = new HashSet<ElronPeriodTicket>();
         }
 
-        [Key]
         public string Id { get; set; }
         public decimal? Balance { get; set; }
         public int? PeriodTicketThreshold { get; set; }
@@ -26,10 +25,7 @@ namespace ElronAPI.Models
     }
 
     public class ElronTransaction
-    {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
+    {   
         public DateTime Date { get; set; }
         public string Name { get; set; }
         public decimal Sum { get; set; }
@@ -40,7 +36,6 @@ namespace ElronAPI.Models
 
     public class ElronTicket
     {
-        [Key]
         public Guid Id { get; set; }
         public string Number { get; set; }
         public string Url { get; set; }
@@ -48,9 +43,6 @@ namespace ElronAPI.Models
 
     public class ElronPeriodTicket
     {
-        [Key]
-        [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-        public long Id { get; set; }
         public DateTime ValidFrom { get; set; }
         public DateTime ValidTo { get; set; }
 

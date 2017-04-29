@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using ElronAPI.Models;
 using Microsoft.AspNetCore.Mvc;
@@ -46,18 +47,27 @@ namespace ElronAPI.Controllers
                              End = destinationStopTime.ArrivalTime
                          }).OrderBy(o => o.Start).ToList();
 
-            if(!all) times.RemoveAll(o => TimeSpan.Parse(o.Start) < timeOfDay);
+            if (!all) times.RemoveAll(o => TimeSpan.Parse(o.Start) < timeOfDay);
 
-            for(int i = times.Count - 1; i >= 0; i--){
+            var calendarList = (from calendar in _dbContext.Calendar
+                                join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
+                                select calendar).ToList();
+
+            for (int i = times.Count - 1; i >= 0; i--)
+            {
                 var time = times[i];
-                var calendar = _dbContext.Calendar.First(c => c.ServiceId == time.ServiceId);
+                var calendar = calendarList.FirstOrDefault(c => c.ServiceId == time.ServiceId);
 
-                if(!StopExistsOnDay(now.DayOfWeek, calendar)){
+                if (calendar == null) continue;
+
+                if (!StopExistsOnDay(now.DayOfWeek, calendar))
+                {
                     times.RemoveAt(i);
                     continue;
                 }
 
-                if((now < calendar.StartDate || now > calendar.EndDate)){
+                if ((now < calendar.StartDate || now > calendar.EndDate))
+                {
                     times.RemoveAt(i);
                 }
             }
@@ -67,7 +77,7 @@ namespace ElronAPI.Controllers
 
         private bool StopExistsOnDay(DayOfWeek day, Calendar calendar)
         {
-            switch(day)
+            switch (day)
             {
                 case DayOfWeek.Monday:
                     return calendar.Monday;

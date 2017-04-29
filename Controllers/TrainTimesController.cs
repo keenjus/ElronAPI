@@ -31,13 +31,12 @@ namespace ElronAPI.Controllers
             var now = DateTime.Now;
             var timeOfDay = now.TimeOfDay;
 
-            var originStopTimes = _dbContext.StopTimes.Where(st => st.Stop.StopName.ToLower() == origin && st.Trip.Route.AgencyId == 82);
-            var destinationStopTimes = _dbContext.StopTimes.Where(st => st.Stop.StopName.ToLower() == destination && st.Trip.Route.AgencyId == 82).Include(s => s.Trip);
-
-            var times = (from originStopTime in originStopTimes
-                         join destinationStopTime in destinationStopTimes
+            var times = (from originStopTime in _dbContext.StopTimes
+                         join destinationStopTime in _dbContext.StopTimes
                          on originStopTime.TripId equals destinationStopTime.TripId
-                         where originStopTime.StopSequence < destinationStopTime.StopSequence
+                         where (originStopTime.Trip.Route.AgencyId == 82 && destinationStopTime.Trip.Route.AgencyId == 82) &&
+                               (originStopTime.Stop.StopName.ToLower() == origin && destinationStopTime.Stop.StopName.ToLower() == destination) &&
+                               originStopTime.StopSequence < destinationStopTime.StopSequence
                          select new
                          {
                              ServiceId = destinationStopTime.Trip.ServiceId,

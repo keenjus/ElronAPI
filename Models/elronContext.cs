@@ -12,14 +12,14 @@ namespace ElronAPI.Models
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
-            modelBuilder.Entity<CachedAccount>(entity =>
+            modelBuilder.Entity<CachedResponse>(entity =>
             {
                 entity.Property(e => e.Data)
                     .IsRequired()
-                    .HasColumnType("json");
+                    .HasColumnType("jsonb");
             });
         }
         
-        public DbSet<CachedAccount> CachedAccounts { get; set; }
+        public DbSet<CachedResponse> CachedResponses { get; set; }
     }
 }

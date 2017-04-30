@@ -31,7 +31,7 @@ namespace ElronAPI.Controllers
         {
             var now = DateTime.Now;
 
-            var exists = _dbContext.CachedAccounts.FirstOrDefault(ca => ca.Id == id.Trim());
+            var exists = _dbContext.CachedResponses.FirstOrDefault(ca => ca.Id == id.Trim());
 
             if (exists != null)
             {
@@ -41,7 +41,7 @@ namespace ElronAPI.Controllers
                 }
                 else
                 {
-                    _dbContext.CachedAccounts.Remove(exists);
+                    _dbContext.CachedResponses.Remove(exists);
                     _dbContext.SaveChanges();
                 }
             }
@@ -125,7 +125,7 @@ namespace ElronAPI.Controllers
                 }
             }
 
-            _dbContext.CachedAccounts.Add(new CachedAccount()
+            _dbContext.CachedResponses.Add(new CachedResponse()
             {
                 Id = id.Trim(),
                 Data = JsonConvert.SerializeObject(account, new JsonSerializerSettings

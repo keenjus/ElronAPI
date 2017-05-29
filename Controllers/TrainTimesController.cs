@@ -66,7 +66,7 @@ namespace ElronAPI.Controllers
                     continue;
                 }
 
-                if ((now < calendar.StartDate || now > calendar.EndDate))
+                if ((now < calendar.StartDate || now > new DateTime(calendar.EndDate.Year, calendar.EndDate.Month, calendar.EndDate.Day, 23, 59, 59)))
                 {
                     times.RemoveAt(i);
                 }

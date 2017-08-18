@@ -1,30 +1,27 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
 using ElronAPI.Models;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
+using System;
+using System.Linq;
 
 namespace ElronAPI.Controllers
 {
     [Route("api/[controller]")]
     public class TrainTimesController : Controller
     {
-        private peatusContext _dbContext;
+        private readonly PeatusContext _dbContext;
 
-        public TrainTimesController(peatusContext dbContext)
+        public TrainTimesController(PeatusContext dbContext)
         {
             _dbContext = dbContext;
         }
 
         public IActionResult Index(string origin, string destination, bool all = false)
         {
-            if (string.IsNullOrWhiteSpace(origin) || string.IsNullOrWhiteSpace(destination))
-            {
-                Response.StatusCode = 403;
-                return new JsonResult(new { error = true, message = "Missing parameters" });
-            }
-            return new JsonResult(GetTrainTimes(origin.ToLower(), destination.ToLower(), all));
+            if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination))
+                return new JsonResult(GetTrainTimes(origin.ToLower(), destination.ToLower(), all));
+
+            Response.StatusCode = 403;
+            return new JsonResult(new { error = true, message = "Missing parameters" });
         }
 
         private object GetTrainTimes(string origin, string destination, bool all = false)
@@ -75,7 +72,7 @@ namespace ElronAPI.Controllers
             return times;
         }
 
-        private bool StopExistsOnDay(DayOfWeek day, Calendar calendar)
+        private static bool StopExistsOnDay(DayOfWeek day, Calendar calendar)
         {
             switch (day)
             {

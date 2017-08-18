@@ -23,8 +23,8 @@ namespace ElronAPI
         
         public void ConfigureServices(IServiceCollection services)
         {
-            services.AddDbContext<elronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
-            services.AddDbContext<peatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
+            services.AddDbContext<ElronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
+            services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;

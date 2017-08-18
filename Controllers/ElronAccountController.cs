@@ -1,17 +1,14 @@
+using ElronAPI.Models;
+using HtmlAgilityPack;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 using System;
-using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ElronAPI.Models;
-using HtmlAgilityPack;
-using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.WebUtilities;
-using Microsoft.EntityFrameworkCore;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 
 namespace ElronAPI.Controllers
 {
@@ -19,15 +16,15 @@ namespace ElronAPI.Controllers
     public class ElronAccountController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly elronContext _dbContext;
-        public ElronAccountController(elronContext dbContext)
+        private readonly ElronContext _dbContext;
+        public ElronAccountController(ElronContext dbContext)
         {
             _httpClient = new HttpClient();
             _dbContext = dbContext;
         }
 
         [HttpGet("{id}", Name = "GetAccount")]
-        public async Task<IActionResult> GetById(string id, bool all = false)
+        public async Task<IActionResult> GetById(string id)
         {
             var now = DateTime.Now;
 
@@ -39,15 +36,12 @@ namespace ElronAPI.Controllers
                 {
                     return Content(exists.Data, "application/json");
                 }
-                else
-                {
-                    _dbContext.CachedResponses.Remove(exists);
-                    _dbContext.SaveChanges();
-                }
+                _dbContext.CachedResponses.Remove(exists);
+                _dbContext.SaveChanges();
             }
 
-            var result = await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
-            result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
+            await _httpClient.GetAsync($"https://pilet.elron.ee/Account/Login?cardNumber={id}");
+            var result = await _httpClient.GetAsync("https://pilet.elron.ee/Account/Statement?allTransactions=True");
 
             result.EnsureSuccessStatusCode();
 
@@ -66,13 +60,12 @@ namespace ElronAPI.Controllers
             {
                 return ScrapeError("Failed to find balance value attribute.");
             }
-            decimal balance;
-            if (!decimal.TryParse(valueAttribute.Value.Replace(",", "."), NumberStyles.Number, CultureInfo.InvariantCulture, out balance))
+            if (!decimal.TryParse(valueAttribute.Value.Replace(",", "."), NumberStyles.Number, CultureInfo.InvariantCulture, out decimal balance))
             {
                 return ScrapeError("Failed to parse balance.");
             }
 
-            var account = new ElronAccount() { Id = id, Balance = balance, LastCheck = now };
+            var account = new ElronAccount { Id = id, Balance = balance, LastCheck = now };
 
             var transactionsTableNode = doc.DocumentNode.SelectSingleNode("//*[@id=\"content\"]/section/section/section/section/section/div/table/tbody");
             if (transactionsTableNode != null)
@@ -96,10 +89,10 @@ namespace ElronAPI.Controllers
 
                     if (ticketNode != null)
                     {
-                        var ticketNodeHrefValue = ticketNode.Attributes["href"].Value;
+                        string ticketNodeHrefValue = ticketNode.Attributes["href"].Value;
                         var ticketGuid = Guid.Parse(ticketNodeHrefValue.Substring(ticketNodeHrefValue.Length - 36));
 
-                        var ticket = new ElronTicket() { Id = ticketGuid, Number = ticketNode.InnerText.Trim(), Url = new Uri(new Uri("https://pilet.elron.ee/"), ticketNodeHrefValue).AbsoluteUri };
+                        var ticket = new ElronTicket { Id = ticketGuid, Number = ticketNode.InnerText.Trim(), Url = new Uri(new Uri("https://pilet.elron.ee/"), ticketNodeHrefValue).AbsoluteUri };
                         transaction.Ticket = ticket;
 
                         var validityNode = nameNode.SelectSingleNode("div[contains(@class, 'validity')]");
@@ -131,7 +124,7 @@ namespace ElronAPI.Controllers
                 Data = JsonConvert.SerializeObject(account, new JsonSerializerSettings
                 {
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
-                    Formatting = Newtonsoft.Json.Formatting.Indented
+                    Formatting = Formatting.Indented
                 }),
                 ExpireTime = DateTime.Now.AddMinutes(5)
             });

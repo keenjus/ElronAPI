@@ -7,7 +7,7 @@ using ElronAPI.Models;
 
 namespace ElronAPI.Migrations.peatus
 {
-    [DbContext(typeof(peatusContext))]
+    [DbContext(typeof(PeatusContext))]
     partial class peatusContextModelSnapshot : ModelSnapshot
     {
         protected override void BuildModel(ModelBuilder modelBuilder)

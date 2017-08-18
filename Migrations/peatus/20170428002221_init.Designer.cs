@@ -7,7 +7,7 @@ using ElronAPI.Models;
 
 namespace ElronAPI.Migrations.peatus
 {
-    [DbContext(typeof(peatusContext))]
+    [DbContext(typeof(PeatusContext))]
     [Migration("20170428002221_init")]
     partial class init
     {

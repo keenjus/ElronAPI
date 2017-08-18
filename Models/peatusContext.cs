@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore.Metadata;
 
 namespace ElronAPI.Models
 {
-    public partial class peatusContext : DbContext
+    public partial class PeatusContext : DbContext
     {
         public virtual DbSet<Agency> Agencies { get; set; }
         public virtual DbSet<Calendar> Calendar { get; set; }
@@ -13,7 +13,7 @@ namespace ElronAPI.Models
         public virtual DbSet<Stop> Stops { get; set; }
         public virtual DbSet<Trip> Trips { get; set; }
 
-        public peatusContext(DbContextOptions<peatusContext> options) : base(options)
+        public PeatusContext(DbContextOptions<PeatusContext> options) : base(options)
         {
 
         }

@@ -3,9 +3,9 @@ using Microsoft.Extensions.Configuration;
 
 namespace ElronAPI.Models
 {
-    public class elronContext : DbContext
+    public class ElronContext : DbContext
     {
-        public elronContext(DbContextOptions<elronContext> options) : base(options)
+        public ElronContext(DbContextOptions<ElronContext> options) : base(options)
         {
 
         }
@@ -17,6 +17,9 @@ namespace ElronAPI.Models
                 entity.Property(e => e.Data)
                     .IsRequired()
                     .HasColumnType("jsonb");
+                entity.Property(e => e.ExpireTime)
+                    .IsRequired()
+                    .HasColumnType("timestamp");
             });
         }
         

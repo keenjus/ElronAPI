@@ -1,11 +1,35 @@
-image : microsoft/dotnet:latest
+image: microsoft/dotnet:2.1-sdk
+
 stages:
   - build
-before_script:
-  - 'dotnet restore'
+  - test
+  - deploy
+
 build:
- stage: build
- script:
-  - 'dotnet build'
- only:
-   - master
+  stage: build
+  script:
+    - dotnet restore
+    - dotnet build
+    - dotnet publish -c Release -o obj/App/publish
+  artifacts:
+    expire_in: 1 month
+    paths:
+      - obj/App/publish/*
+
+deploy_gcloud:
+  before_script:
+    - echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
+    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
+    - apt-get update && apt-get install google-cloud-sdk -y
+  stage: deploy
+  environment: Development
+  when: manual
+  only:
+    - master
+  script:
+    - echo $DEPLOY_KEY_FILE > /tmp/$CI_PIPELINE_ID.json
+    - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
+    - cd obj/App/publish/
+    - gcloud beta app deploy app.yaml --quiet --project $PROJECT_ID
+  after_script:
+    - rm /tmp/$CI_PIPELINE_ID.json

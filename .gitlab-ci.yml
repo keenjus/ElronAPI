@@ -12,7 +12,7 @@ test:
   stage: test
   script:
     - dotnet restore
-    - dotnet test
+    - dotnet test ElronAPI.Tests/ElronAPI.Tests.csproj
 
 build:
   stage: build

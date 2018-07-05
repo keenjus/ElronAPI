@@ -34,7 +34,7 @@ namespace ElronAPI.Api.Controllers
                 return new JsonResult(new JsonErrorResponseModel { Error = true, Message = "Cardnumber not specified or is null" });
             }
 
-            var now = DateTime.Now;
+            var now = DateTime.UtcNow;
 
             var exists = _dbContext.CachedResponses.FirstOrDefault(ca => ca.Id == id.Trim());
 
@@ -134,7 +134,7 @@ namespace ElronAPI.Api.Controllers
                     ContractResolver = new CamelCasePropertyNamesContractResolver(),
                     Formatting = Formatting.Indented
                 }),
-                ExpireTime = DateTime.Now.AddMinutes(5)
+                ExpireTime = DateTime.UtcNow.AddMinutes(5)
             });
             _dbContext.SaveChanges();
 

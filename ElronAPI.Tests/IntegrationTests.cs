@@ -1,14 +1,11 @@
 using System;
 using System.Net;
 using System.Net.Http;
-using System.Reflection;
 using System.Threading.Tasks;
 using ElronAPI.Api;
 using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
-using System.Dynamic;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using Xunit;
@@ -64,7 +61,7 @@ namespace ElronAPI.Tests
             var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
 
             // validate cardnumber
-            Assert.True(responseObject.error);
+            Assert.True(responseObject.Error);
         }
 
         [Fact]
@@ -80,7 +77,7 @@ namespace ElronAPI.Tests
             var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
 
             // validate cardnumber
-            Assert.True(responseObject.error);
+            Assert.True(responseObject.Error);
         }
 
         public void Dispose()

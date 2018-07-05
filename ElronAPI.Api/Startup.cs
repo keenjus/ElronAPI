@@ -17,8 +17,8 @@ namespace ElronAPI.Api
             Environment = environment;
         }
 
-        public static IConfiguration Configuration { get; private set; }
-        public static IHostingEnvironment Environment { get; private set; }
+        private static IConfiguration Configuration { get; set; }
+        private static IHostingEnvironment Environment { get; set; }
         
         public Startup(IHostingEnvironment env){
             var builder = new ConfigurationBuilder()
@@ -48,7 +48,7 @@ namespace ElronAPI.Api
             });
         }
 
-        public void Configure(IApplicationBuilder app, IHostingEnvironment env, ILoggerFactory loggerFactory)
+        public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
             app.UseMvc();
             loggerFactory.AddConsole().AddDebug();

@@ -31,7 +31,7 @@ namespace ElronAPI.Api.Controllers
             if (string.IsNullOrWhiteSpace(id))
             {
                 Response.StatusCode = 400;
-                return new JsonResult(new JsonErrorResponseModel { error = true, message = $"Cardnumber not specified or is null" });
+                return new JsonResult(new JsonErrorResponseModel { Error = true, Message = "Cardnumber not specified or is null" });
             }
 
             var now = DateTime.Now;
@@ -153,7 +153,7 @@ namespace ElronAPI.Api.Controllers
         private IActionResult ScrapeError(string message)
         {
             Response.StatusCode = 500;
-            return new JsonResult(new JsonErrorResponseModel { error = true, message = message });
+            return new JsonResult(new JsonErrorResponseModel { Error = true, Message = message });
         }
     }
 }

@@ -44,12 +44,6 @@ namespace ElronAPI.Api.Data
         public DateTime ValidTo { get; set; }
 
         [NotMapped]
-        public bool IsActive
-        {
-            get
-            {
-                return this.ValidTo > DateTime.Now;
-            }
-        }
+        public bool IsActive => ValidTo > DateTime.Now;
     }
 }

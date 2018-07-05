@@ -22,7 +22,7 @@ namespace ElronAPI.Api.Controllers
                 return new JsonResult(GetTrainTimes(origin.ToLower(), destination.ToLower(), all));
 
             Response.StatusCode = 400;
-            return new JsonResult(new JsonErrorResponseModel { error = true, message = "Missing parameters" });
+            return new JsonResult(new JsonErrorResponseModel { Error = true, Message = "Missing parameters" });
         }
 
         private object GetTrainTimes(string origin, string destination, bool all = false)

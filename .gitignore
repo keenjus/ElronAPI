@@ -32,4 +32,4 @@ msbuild.wrn
 .vs/
 
 # Configuration files
-appsettings.json
+# appsettings.json

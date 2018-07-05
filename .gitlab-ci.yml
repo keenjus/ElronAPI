@@ -32,8 +32,7 @@ deploy_gcloud:
     - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
     - cd obj/App/publish/
     - CONNSTRING_ELRON="$CONNECTIONSTRING_ELRON" jq '.ConnectionStrings.Elron = env.CONNSTRING_ELRON' appsettings.json > temp_appsettings.json && mv temp_appsettings.json appsettings.json
-    - rm temp_appsettings.json
-    - CONNSTRING_PEATUS="$CONNECTIONSTRING_PEATUS" jq '.ConnectionStrings.Peatus = env.CONNSTRING_PEATUS' appsettings.json > temp_appsettings.json && mv temp_appsettings.json appsettings.json
+    - CONNSTRING_PEATUS="$CONNECTIONSTRING_PEATUS" jq '.ConnectionStrings.Peatus = env.CONNSTRING_PEATUS' appsettings.json > temp2_appsettings.json && mv temp2_appsettings.json appsettings.json
     - gcloud beta app deploy app.yaml --quiet --project $PROJECT_ID
   after_script:
     - rm /tmp/$CI_PIPELINE_ID.json

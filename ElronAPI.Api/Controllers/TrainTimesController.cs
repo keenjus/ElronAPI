@@ -1,9 +1,10 @@
-using ElronAPI.Models;
-using Microsoft.AspNetCore.Mvc;
 using System;
 using System.Linq;
+using ElronAPI.Api.Data;
+using ElronAPI.Api.Models;
+using Microsoft.AspNetCore.Mvc;
 
-namespace ElronAPI.Controllers
+namespace ElronAPI.Api.Controllers
 {
     [Route("api/[controller]")]
     public class TrainTimesController : Controller
@@ -20,8 +21,8 @@ namespace ElronAPI.Controllers
             if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination))
                 return new JsonResult(GetTrainTimes(origin.ToLower(), destination.ToLower(), all));
 
-            Response.StatusCode = 403;
-            return new JsonResult(new { error = true, message = "Missing parameters" });
+            Response.StatusCode = 400;
+            return new JsonResult(new JsonErrorResponseModel { error = true, message = "Missing parameters" });
         }
 
         private object GetTrainTimes(string origin, string destination, bool all = false)

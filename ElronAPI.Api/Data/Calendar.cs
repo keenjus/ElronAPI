@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace ElronAPI.Models
+namespace ElronAPI.Api.Data
 {
     public partial class Calendar
     {

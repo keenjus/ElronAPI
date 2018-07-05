@@ -8,6 +8,12 @@ stages:
 variables:
   PROJECT_DIR: "ElronAPI.Api"
 
+test:
+  stage: test
+  script:
+    - dotnet restore
+    - dotnet test
+
 build:
   stage: build
   script:

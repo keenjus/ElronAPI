@@ -1,8 +1,6 @@
-﻿using System;
-using Microsoft.EntityFrameworkCore;
-using Microsoft.EntityFrameworkCore.Metadata;
+﻿using Microsoft.EntityFrameworkCore;
 
-namespace ElronAPI.Models
+namespace ElronAPI.Api.Data
 {
     public partial class PeatusContext : DbContext
     {

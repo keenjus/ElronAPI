@@ -1,8 +1,7 @@
 ﻿using System;
-using System.Collections.Generic;
 using System.ComponentModel.DataAnnotations;
 
-namespace ElronAPI.Models
+namespace ElronAPI.Api.Data
 {
     public partial class CachedAccount
     {

@@ -1,11 +1,11 @@
 ﻿using System;
+using ElronAPI.Api.Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Metadata;
 using Microsoft.EntityFrameworkCore.Migrations;
-using ElronAPI.Models;
+using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace ElronAPI.Migrations
+namespace ElronAPI.Api.Migrations
 {
     [DbContext(typeof(ElronContext))]
     [Migration("20170430233844_init")]

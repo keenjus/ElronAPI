@@ -1,7 +1,6 @@
 using Microsoft.EntityFrameworkCore;
-using Microsoft.Extensions.Configuration;
 
-namespace ElronAPI.Models
+namespace ElronAPI.Api.Data
 {
     public class ElronContext : DbContext
     {

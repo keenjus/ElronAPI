@@ -1,16 +1,17 @@
-using ElronAPI.Models;
-using HtmlAgilityPack;
-using Microsoft.AspNetCore.Mvc;
-using Newtonsoft.Json;
-using Newtonsoft.Json.Serialization;
 using System;
 using System.Globalization;
 using System.Linq;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ElronAPI.Api.Data;
+using ElronAPI.Api.Models;
+using HtmlAgilityPack;
+using Microsoft.AspNetCore.Mvc;
+using Newtonsoft.Json;
+using Newtonsoft.Json.Serialization;
 
-namespace ElronAPI.Controllers
+namespace ElronAPI.Api.Controllers
 {
     [Route("api/[controller]")]
     public class ElronAccountController : Controller
@@ -23,9 +24,16 @@ namespace ElronAPI.Controllers
             _dbContext = dbContext;
         }
 
-        [HttpGet("{id}", Name = "GetAccount")]
+        [HttpGet]
+        [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
+            if (string.IsNullOrWhiteSpace(id))
+            {
+                Response.StatusCode = 400;
+                return new JsonResult(new JsonErrorResponseModel { error = true, message = $"Cardnumber not specified or is null" });
+            }
+
             var now = DateTime.Now;
 
             var exists = _dbContext.CachedResponses.FirstOrDefault(ca => ca.Id == id.Trim());
@@ -145,7 +153,7 @@ namespace ElronAPI.Controllers
         private IActionResult ScrapeError(string message)
         {
             Response.StatusCode = 500;
-            return new JsonResult(new { error = true, message = message });
+            return new JsonResult(new JsonErrorResponseModel { error = true, message = message });
         }
     }
 }

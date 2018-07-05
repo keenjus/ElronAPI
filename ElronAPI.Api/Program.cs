@@ -1,7 +1,7 @@
 ﻿using Microsoft.AspNetCore;
 using Microsoft.AspNetCore.Hosting;
 
-namespace ElronAPI
+namespace ElronAPI.Api
 {
     public class Program
     {

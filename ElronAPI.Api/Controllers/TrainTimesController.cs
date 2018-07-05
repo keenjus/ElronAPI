@@ -1,8 +1,12 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
+using System.Threading.Tasks;
+using ElronAPI.Api.Classifiers;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 
 namespace ElronAPI.Api.Controllers
 {
@@ -16,40 +20,43 @@ namespace ElronAPI.Api.Controllers
             _dbContext = dbContext;
         }
 
-        public IActionResult Index(string origin, string destination, bool all = false)
+        public async Task<IActionResult> Index(string origin, string destination, bool all = false)
         {
             if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination))
-                return new JsonResult(GetTrainTimes(origin.ToLower(), destination.ToLower(), all));
+                return new JsonResult(await GetTrainTimes(origin, destination, all));
 
             Response.StatusCode = 400;
             return new JsonResult(new JsonErrorResponseModel { Error = true, Message = "Missing parameters" });
         }
 
-        private object GetTrainTimes(string origin, string destination, bool all = false)
+        private async Task<List<TrainTimeModel>> GetTrainTimes(string origin, string destination, bool all = false)
         {
+            string originLowerCase = origin.ToLower();
+            string destinationLowerCase = destination.ToLower();
+
             var now = DateTime.Now;
             var timeOfDay = now.TimeOfDay;
 
-            var times = (from originStopTime in _dbContext.StopTimes
+            var times = await (from originStopTime in _dbContext.StopTimes
                          join destinationStopTime in _dbContext.StopTimes
                          on originStopTime.TripId equals destinationStopTime.TripId
-                         where (originStopTime.Trip.Route.AgencyId == 82 && destinationStopTime.Trip.Route.AgencyId == 82) &&
-                               (originStopTime.Stop.StopName.ToLower() == origin && destinationStopTime.Stop.StopName.ToLower() == destination) &&
+                         where (originStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id && destinationStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id) &&
+                               (originStopTime.Stop.StopName.ToLower() == originLowerCase && destinationStopTime.Stop.StopName.ToLower() == destinationLowerCase) &&
                                originStopTime.StopSequence < destinationStopTime.StopSequence
-                         select new
+                         select new TrainTimeModel
                          {
                              ServiceId = destinationStopTime.Trip.ServiceId,
                              RouteLongName = originStopTime.Trip.Route.RouteLongName,
                              RouteShortName = originStopTime.Trip.Route.RouteShortName,
                              Start = originStopTime.DepartureTime,
                              End = destinationStopTime.ArrivalTime
-                         }).OrderBy(o => o.Start).ToList();
+                         }).OrderBy(o => o.Start).ToListAsync();
 
             if (!all) times.RemoveAll(o => TimeSpan.Parse(o.Start) < timeOfDay);
 
-            var calendarList = (from calendar in _dbContext.Calendar
+            var calendarList = await (from calendar in _dbContext.Calendar
                                 join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
-                                select calendar).ToList();
+                                select calendar).ToListAsync();
 
             for (int i = times.Count - 1; i >= 0; i--)
             {

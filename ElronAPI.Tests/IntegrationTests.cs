@@ -26,6 +26,20 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
+        public async Task TrainTimesBadRequest()
+        {
+            var response = await Client.GetAsync($"/api/traintimes?origin=&destination=&all=true");
+
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+
+            string responseString = await response.Content.ReadAsStringAsync();
+
+            var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
+
+            Assert.True(responseObject.Error);
+        }
+
+        [Fact]
         public async Task ValidAccount()
         {
             string cardNumber = "92000153082";

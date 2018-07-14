@@ -1,9 +1,3 @@
-using System;
-using System.Globalization;
-using System.Linq;
-using System.Net;
-using System.Net.Http;
-using System.Threading.Tasks;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using ElronAPI.Domain.Exceptions;
@@ -11,6 +5,12 @@ using ElronAPI.Domain.Helpers;
 using HtmlAgilityPack;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Globalization;
+using System.Linq;
+using System.Net;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ElronAPI.Api.Controllers
 {
@@ -148,7 +148,7 @@ namespace ElronAPI.Api.Controllers
             }
         }
 
-        public ElronAccount SortAccountTransactions(ElronAccount account)
+        private ElronAccount SortAccountTransactions(ElronAccount account)
         {
             if (account?.Transactions != null)
             {

@@ -1,7 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.Linq;
-using System.Threading.Tasks;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using ElronAPI.Domain.Classifiers;
@@ -10,6 +6,10 @@ using ElronAPI.Domain.Helpers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace ElronAPI.Api.Controllers
 {
@@ -25,6 +25,7 @@ namespace ElronAPI.Api.Controllers
             _memoryCache = memoryCache;
         }
 
+        [HttpGet]
         public async Task<IActionResult> Index(string origin, string destination, bool all = false)
         {
             if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination))
@@ -32,6 +33,25 @@ namespace ElronAPI.Api.Controllers
 
             Response.StatusCode = 400;
             return Json(new JsonErrorResponseModel { Error = true, Message = "Missing parameters" });
+        }
+
+        [HttpGet("stops")]
+        public async Task<IActionResult> Stops()
+        {
+            var trainStops = await _memoryCache.GetOrCreateAsync(CacheKeyHelper.GetTrainStopsCacheKey(), async entry =>
+            {
+                entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
+
+                // this might not be the fastest way to get traintimes
+                return await _dbContext.Routes.Where(r => r.AgencyId == AgencyType.Elron.Id)
+                    .SelectMany(x => x.Trips)
+                    .SelectMany(x => x.StopTimes)
+                    .Select(x => x.Stop.StopName)
+                    .Distinct()
+                    .ToListAsync();
+            });
+
+            return Json(trainStops);
         }
 
         private async Task<List<TrainTimeModel>> GetTrainTimes(string origin, string destination, bool all = false)

@@ -1,5 +1,4 @@
-﻿using System.Text.RegularExpressions;
-using ElronAPI.Domain.Extensions;
+﻿using ElronAPI.Domain.Extensions;
 
 namespace ElronAPI.Domain.Helpers
 {
@@ -22,6 +21,11 @@ namespace ElronAPI.Domain.Helpers
             ArgumentHelper.AssertNotNullOrEmpty(destination, nameof(destination));
 
             return $"traintimes_{origin.RemoveWhiteSpace()}-{destination.RemoveWhiteSpace()}";
+        }
+
+        public static string GetTrainStopsCacheKey()
+        {
+            return "trainstops";
         }
     }
 }

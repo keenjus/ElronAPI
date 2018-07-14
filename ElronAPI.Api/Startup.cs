@@ -45,7 +45,7 @@ namespace ElronAPI.Api
 
             services.AddMvc().AddJsonOptions(options =>
             {
-                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;
+                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
             });
         }

@@ -18,13 +18,11 @@ namespace ElronAPI.Api.Controllers
     public class ElronAccountController : Controller
     {
         private readonly HttpClient _httpClient;
-        private readonly ElronContext _dbContext;
         private readonly IMemoryCache _memoryCache;
 
-        public ElronAccountController(ElronContext dbContext, IMemoryCache memoryCache)
+        public ElronAccountController(IMemoryCache memoryCache)
         {
             _httpClient = new HttpClient();
-            _dbContext = dbContext;
             _memoryCache = memoryCache;
         }
 
@@ -35,7 +33,7 @@ namespace ElronAPI.Api.Controllers
             if (string.IsNullOrWhiteSpace(id))
             {
                 Response.StatusCode = 400;
-                return new JsonResult(new JsonErrorResponseModel { Error = true, Message = "Cardnumber not specified or is null" });
+                return Json(new JsonErrorResponseModel { Error = true, Message = "Cardnumber not specified or is null" });
             }
 
             try
@@ -141,7 +139,7 @@ namespace ElronAPI.Api.Controllers
                     return account;
                 });
 
-                return new JsonResult(SortAccountTransactions(accountData));
+                return Json(SortAccountTransactions(accountData));
 
             }
             catch (ScrapeException ex)
@@ -162,7 +160,7 @@ namespace ElronAPI.Api.Controllers
         private IActionResult ScrapeError(string message)
         {
             Response.StatusCode = 500;
-            return new JsonResult(new JsonErrorResponseModel { Error = true, Message = message });
+            return Json(new JsonErrorResponseModel { Error = true, Message = message });
         }
     }
 }

@@ -1,4 +1,4 @@
-namespace ElronAPI.Api.Classifiers
+namespace ElronAPI.Domain.Classifiers
 {
     public class AgencyType
     {

@@ -2,9 +2,9 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
-using ElronAPI.Api.Classifiers;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
+using ElronAPI.Domain.Classifiers;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 

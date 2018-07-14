@@ -41,6 +41,8 @@ namespace ElronAPI.Api
                 services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
             }
 
+            services.AddMemoryCache();
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.Indented;

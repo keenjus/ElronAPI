@@ -12,12 +12,12 @@ using Xunit;
 
 namespace ElronAPI.Tests
 {
-    public class IntegrationTests : IDisposable
+    public class ApiShould : IDisposable
     {
         public readonly TestServer Server;
         public readonly HttpClient Client;
 
-        public IntegrationTests()
+        public ApiShould()
         {
             Server = new TestServer(new WebHostBuilder()
                 .UseEnvironment("Test").UseStartup<Startup>());
@@ -26,7 +26,7 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
-        public async Task TrainTimesBadRequest()
+        public async Task Return_TrainTimes_BadRequest()
         {
             var response = await Client.GetAsync($"/api/traintimes?origin=&destination=&all=true");
 
@@ -40,7 +40,7 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
-        public async Task ValidAccount()
+        public async Task Return_Valid_Account()
         {
             string cardNumber = "92000153082";
 
@@ -62,7 +62,7 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
-        public async Task InvalidAccount()
+        public async Task Return_Error_If_Invalid_Account()
         {
             string cardNumber = "920001653082";
 
@@ -74,12 +74,11 @@ namespace ElronAPI.Tests
 
             var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
 
-            // validate cardnumber
             Assert.True(responseObject.Error);
         }
 
         [Fact]
-        public async Task NoAccount()
+        public async Task Return_Error_If_No_Account_Specified()
         {
             var response = await Client.GetAsync("/api/elronaccount/");
 
@@ -90,7 +89,6 @@ namespace ElronAPI.Tests
 
             var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
 
-            // validate cardnumber
             Assert.True(responseObject.Error);
         }
 

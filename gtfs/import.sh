@@ -19,4 +19,5 @@ copy routes from '${PWD}""/gtfs/routes.txt' delimiter ',' ENCODING 'unicode' CSV
 copy stops from '${PWD}""/gtfs/stops.txt' delimiter ',' ENCODING 'unicode' CSV HEADER;
 copy trips from '${PWD}""/gtfs/trips.txt' delimiter ',' ENCODING 'unicode' CSV HEADER;
 copy stop_times from '${PWD}""/gtfs/stop_times.txt' delimiter ',' ENCODING 'unicode' CSV HEADER;
-copy calendar from '${PWD}""/gtfs/calendar.txt' delimiter ',' ENCODING 'unicode' CSV HEADER;"
+copy calendar from '${PWD}""/gtfs/calendar.txt' delimiter ',' ENCODING 'unicode' CSV HEADER;
+insert into public.""import_logs""(""import_date"") values(now());"

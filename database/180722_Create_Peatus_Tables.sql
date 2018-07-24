@@ -94,3 +94,13 @@ CREATE TABLE public.calendar (
 WITH (
 	OIDS=FALSE
 );
+
+CREATE TABLE public.import_logs
+(
+    id bigint NOT NULL DEFAULT nextval('importlogs_id_seq'::regclass),
+    import_date timestamp with time zone NOT NULL,
+    CONSTRAINT importlogs_pkey PRIMARY KEY (id)
+)
+WITH (
+    OIDS = FALSE
+);

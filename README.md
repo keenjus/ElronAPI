@@ -1,1 +1,14 @@
-[![Build Status](https://travis-ci.com/keenjus/ElronAPI.svg?token=VoD9fzTnP6UJ6mGRdqTs&branch=master)](https://travis-ci.com/keenjus/ElronAPI)
+# ElronAPI
+This is a web API project that serves train times and Elron account info.
+
+Mainly used by my Android app `Eesti rongiajad`
+
+# GTFS
+GTFS data is pulled from https://peatus.ee/gtfs.
+
+An automated import script is located in `gtfs/`
+
+# Database Scaffolding
+Modify the connectionstring if needed:
+
+`Scaffold-DbContext "User ID=postgres;Password=<password>;Host=localhost;Port=5432;Database=peatus;" "Npgsql.EntityFrameworkCore.PostgreSQL" -Context PeatusContext -o ./Data/ -f`

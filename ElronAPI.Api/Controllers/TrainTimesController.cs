@@ -35,21 +35,39 @@ namespace ElronAPI.Api.Controllers
             return Json(new JsonErrorResponseModel { Error = true, Message = "Missing parameters" });
         }
 
+
+        [HttpGet("lastimport")]
+        public async Task<IActionResult> LastImport()
+        {
+            var lastImportDate = await _memoryCache.GetOrCreateAsync(CacheKeyHelper.GetLastImportDateCacheKey(),
+                async entry =>
+                {
+                    entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
+                    return (await _dbContext.ImportLogs.OrderByDescending(x => x.ImportDate).FirstOrDefaultAsync())?.ImportDate;
+                });
+
+            return Json(new
+            {
+                lastImportDate
+            });
+        }
+
         [HttpGet("stops")]
         public async Task<IActionResult> Stops()
         {
-            var trainStops = await _memoryCache.GetOrCreateAsync(CacheKeyHelper.GetTrainStopsCacheKey(), async entry =>
-            {
-                entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
+            var trainStops = await _memoryCache.GetOrCreateAsync(CacheKeyHelper.GetTrainStopsCacheKey(),
+                async entry =>
+                {
+                    entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
 
-                // this might not be the fastest way to get traintimes
-                return await _dbContext.Routes.Where(r => r.AgencyId == AgencyType.Elron.Id)
-                    .SelectMany(x => x.Trips)
-                    .SelectMany(x => x.StopTimes)
-                    .Select(x => x.Stop.StopName)
-                    .Distinct()
-                    .ToListAsync();
-            });
+                    // this might not be the fastest way to get traintimes
+                    return await _dbContext.Routes.Where(r => r.AgencyId == AgencyType.Elron.Id)
+                        .SelectMany(x => x.Trips)
+                        .SelectMany(x => x.StopTimes)
+                        .Select(x => x.Stop.StopName)
+                        .Distinct()
+                        .ToListAsync();
+                });
 
             return Json(trainStops);
         }
@@ -59,60 +77,62 @@ namespace ElronAPI.Api.Controllers
             string originLowerCase = origin.ToLower();
             string destinationLowerCase = destination.ToLower();
 
-            var traintimes =  await _memoryCache.GetOrCreateAsync(CacheKeyHelper.GetTrainTimesCacheKey(origin, destination), async entry =>
-            {
-                entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
-
-                var times = await (from originStopTime in _dbContext.StopTimes
-                                   join destinationStopTime in _dbContext.StopTimes
-                                   on originStopTime.TripId equals destinationStopTime.TripId
-                                   where (originStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id && destinationStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id) &&
-                                         (originStopTime.Stop.StopName.ToLower() == originLowerCase && destinationStopTime.Stop.StopName.ToLower() == destinationLowerCase) &&
-                                         originStopTime.StopSequence < destinationStopTime.StopSequence
-                                   select new TrainTimeModel
-                                   {
-                                       ServiceId = destinationStopTime.Trip.ServiceId,
-                                       RouteLongName = originStopTime.Trip.Route.RouteLongName,
-                                       RouteShortName = originStopTime.Trip.Route.RouteShortName,
-                                       Start = originStopTime.DepartureTime,
-                                       End = destinationStopTime.ArrivalTime
-                                   }).OrderBy(o => o.Start).ToListAsync();
-
-                var calendarList = await (from calendar in _dbContext.Calendar
-                                          join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
-                                          select calendar).ToListAsync();
-
-                var now = DateTime.Now;
-
-                for (int i = times.Count - 1; i >= 0; i--)
+            var traintimes = await _memoryCache.GetOrCreateAsync(
+                CacheKeyHelper.GetTrainTimesCacheKey(origin, destination),
+                async entry =>
                 {
-                    var time = times[i];
-                    var calendar = calendarList.FirstOrDefault(c => c.ServiceId == time.ServiceId);
+                    entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
 
-                    if (calendar == null) continue;
+                    var times = await (from originStopTime in _dbContext.StopTimes
+                                       join destinationStopTime in _dbContext.StopTimes
+                                           on originStopTime.TripId equals destinationStopTime.TripId
+                                       where (originStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id &&
+                                              destinationStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id) &&
+                                             (originStopTime.Stop.StopName.ToLower() == originLowerCase &&
+                                              destinationStopTime.Stop.StopName.ToLower() == destinationLowerCase) &&
+                                             originStopTime.StopSequence < destinationStopTime.StopSequence
+                                       select new TrainTimeModel
+                                       {
+                                           ServiceId = destinationStopTime.Trip.ServiceId,
+                                           RouteLongName = originStopTime.Trip.Route.RouteLongName,
+                                           RouteShortName = originStopTime.Trip.Route.RouteShortName,
+                                           Start = originStopTime.DepartureTime,
+                                           End = destinationStopTime.ArrivalTime
+                                       }).OrderBy(o => o.Start).ToListAsync();
 
-                    if (!StopExistsOnDay(now.DayOfWeek, calendar))
+                    var calendarList = await (from calendar in _dbContext.Calendar
+                                              join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
+                                              select calendar).ToListAsync();
+
+                    var now = DateTime.Now;
+
+                    for (int i = times.Count - 1; i >= 0; i--)
                     {
-                        times.RemoveAt(i);
-                        continue;
+                        var time = times[i];
+                        var calendar = calendarList.FirstOrDefault(c => c.ServiceId == time.ServiceId);
+
+                        if (calendar == null) continue;
+
+                        if (!StopExistsOnDay(now.DayOfWeek, calendar))
+                        {
+                            times.RemoveAt(i);
+                            continue;
+                        }
+
+                        if ((now.Date < calendar.StartDate || now > new DateTime(calendar.EndDate.Year,
+                                 calendar.EndDate.Month, calendar.EndDate.Day, 23, 59, 59)))
+                        {
+                            times.RemoveAt(i);
+                        }
                     }
 
-                    if ((now.Date < calendar.StartDate || now > new DateTime(calendar.EndDate.Year, calendar.EndDate.Month, calendar.EndDate.Day, 23, 59, 59)))
-                    {
-                        times.RemoveAt(i);
-                    }
-                }
+                    return times;
+                });
 
-                return times;
-            });
+            if (all) return traintimes;
 
-            if (all == false)
-            {
-                var timeOfDay = DateTime.Now.TimeOfDay;
-                return traintimes.Where(o => TimeSpan.Parse(o.Start) > timeOfDay).ToList();
-            }
-
-            return traintimes;
+            var timeOfDay = DateTime.Now.TimeOfDay;
+            return traintimes.Where(o => TimeSpan.Parse(o.Start) > timeOfDay).ToList();
         }
 
         private static bool StopExistsOnDay(DayOfWeek day, Calendar calendar)

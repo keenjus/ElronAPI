@@ -27,5 +27,10 @@ namespace ElronAPI.Domain.Helpers
         {
             return "trainstops";
         }
+
+        public static string GetLastImportDateCacheKey()
+        {
+            return "lastimportdate";
+        }
     }
 }

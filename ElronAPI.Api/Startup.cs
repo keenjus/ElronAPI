@@ -43,6 +43,13 @@ namespace ElronAPI.Api
 
             services.AddMemoryCache();
 
+            services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder =>
+            {
+                builder.AllowAnyOrigin()
+                    .AllowAnyMethod()
+                    .AllowAnyHeader();
+            }));
+
             services.AddMvc().AddJsonOptions(options =>
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
@@ -52,8 +59,10 @@ namespace ElronAPI.Api
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            app.UseMvc();
             loggerFactory.AddConsole().AddDebug();
+
+            app.UseCors("AllowAllPolicy");
+            app.UseMvc();
         }
     }
 }

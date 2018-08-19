@@ -71,7 +71,7 @@ namespace ElronAPI.Api.Controllers
                         throw new ScrapeException("Failed to parse balance.");
                     }
 
-                    var account = new ElronAccount {Id = id, Balance = balance, LastCheck = DateTime.Now};
+                    var account = new ElronAccountModel {Id = id, Balance = balance, LastCheck = DateTime.Now};
 
                     var transactionsTableNode = doc.DocumentNode.SelectSingleNode("//*[@id=\"content\"]/section/section/section/section/section/div/table/tbody");
 
@@ -81,7 +81,7 @@ namespace ElronAPI.Api.Controllers
 
                     foreach (var tableRow in tableRows)
                     {
-                        var transaction = new ElronTransaction();
+                        var transaction = new ElronAccountModel.Transaction();
 
                         var columns = tableRow.SelectNodes("td");
 
@@ -103,7 +103,7 @@ namespace ElronAPI.Api.Controllers
                             var ticketGuid =
                                 Guid.Parse(ticketNodeHrefValue.Substring(ticketNodeHrefValue.Length - 36));
 
-                            var ticket = new ElronTicket
+                            var ticket = new ElronAccountModel.Ticket
                             {
                                 Id = ticketGuid,
                                 Number = ticketNode.InnerText.Trim(),
@@ -122,7 +122,7 @@ namespace ElronAPI.Api.Controllers
                                 var validTo = DateTime.ParseExact(dateStrings[1], "dd.MM.yyyy HH:mm",
                                     CultureInfo.InvariantCulture);
 
-                                var periodTicket = new ElronPeriodTicket()
+                                var periodTicket = new ElronAccountModel.PeriodTicket()
                                 {
                                     ValidFrom = validFrom,
                                     ValidTo = validTo
@@ -148,7 +148,7 @@ namespace ElronAPI.Api.Controllers
             }
         }
 
-        private ElronAccount SortAccountTransactions(ElronAccount account)
+        private ElronAccountModel SortAccountTransactions(ElronAccountModel account)
         {
             if (account?.Transactions != null)
             {

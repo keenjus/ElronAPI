@@ -50,7 +50,7 @@ namespace ElronAPI.Tests
 
             string responseString = await response.Content.ReadAsStringAsync();
 
-            var elronAccount = JsonConvert.DeserializeObject<ElronAccount>(responseString);
+            var elronAccount = JsonConvert.DeserializeObject<ElronAccountModel>(responseString);
 
             // validate cardnumber
             Assert.Equal(cardNumber, elronAccount.Id);

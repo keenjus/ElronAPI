@@ -81,7 +81,9 @@ namespace ElronAPI.Api.Controllers
                 CacheKeyHelper.GetTrainTimesCacheKey(origin, destination),
                 async entry =>
                 {
-                    entry.AbsoluteExpiration = DateTime.Now.EndOfDay();
+                    var nowEstonian = DateTimeHelper.NowEstonian();
+
+                    entry.AbsoluteExpirationRelativeToNow = DateTimeHelper.TimeUntilMidnight(nowEstonian);
 
                     var times = await (from originStopTime in _dbContext.StopTimes
                                        join destinationStopTime in _dbContext.StopTimes
@@ -104,8 +106,6 @@ namespace ElronAPI.Api.Controllers
                                               join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
                                               select calendar).ToListAsync();
 
-                    var now = DateTime.Now;
-
                     for (int i = times.Count - 1; i >= 0; i--)
                     {
                         var time = times[i];
@@ -113,13 +113,13 @@ namespace ElronAPI.Api.Controllers
 
                         if (calendar == null) continue;
 
-                        if (!StopExistsOnDay(now.DayOfWeek, calendar))
+                        if (!StopExistsOnDay(nowEstonian.DayOfWeek, calendar))
                         {
                             times.RemoveAt(i);
                             continue;
                         }
 
-                        if ((now.Date < calendar.StartDate || now > new DateTime(calendar.EndDate.Year,
+                        if ((nowEstonian.Date < calendar.StartDate || nowEstonian > new DateTime(calendar.EndDate.Year,
                                  calendar.EndDate.Month, calendar.EndDate.Day, 23, 59, 59)))
                         {
                             times.RemoveAt(i);
@@ -131,7 +131,7 @@ namespace ElronAPI.Api.Controllers
 
             if (all) return traintimes;
 
-            var timeOfDay = DateTime.Now.TimeOfDay;
+            var timeOfDay = DateTimeHelper.NowEstonian().TimeOfDay;
             return traintimes.Where(o => TimeSpan.Parse(o.Start) > timeOfDay).ToList();
         }
 

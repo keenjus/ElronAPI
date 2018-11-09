@@ -31,5 +31,8 @@ msbuild.wrn
 # Visual Studio 2015
 .vs/
 
+# Idea
+.idea/
+
 # Configuration files
 # appsettings.json

@@ -85,9 +85,9 @@ namespace ElronAPI.Api
                 {
                     Authorization = new[] {new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey"))}
                 });
+                
+                ConfigureHangfireJobs();
             }
-
-            ConfigureHangfireJobs();
 
             app.UseCors("AllowAllPolicy");
             app.UseMvc();

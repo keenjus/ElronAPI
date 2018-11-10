@@ -97,7 +97,7 @@ WITH (
 
 CREATE TABLE public.import_logs
 (
-    id bigint NOT NULL DEFAULT nextval('importlogs_id_seq'::regclass),
+    id bigserial NOT null,
     import_date timestamp with time zone NOT NULL,
     CONSTRAINT importlogs_pkey PRIMARY KEY (id)
 )

@@ -1,4 +1,10 @@
+using System;
+using System.Threading.Tasks;
 using ElronAPI.Api.Data;
+using ElronAPI.Api.Extensions;
+using ElronAPI.Api.Hangfire;
+using Hangfire;
+using Hangfire.PostgreSql;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -19,18 +25,19 @@ namespace ElronAPI.Api
 
         private static IConfiguration Configuration { get; set; }
         private static IHostingEnvironment Environment { get; set; }
-        
-        public Startup(IHostingEnvironment env){
+
+        public Startup(IHostingEnvironment env)
+        {
             var builder = new ConfigurationBuilder()
                 .SetBasePath(env.ContentRootPath)
                 .AddJsonFile("appsettings.json", optional: true, reloadOnChange: true)
                 .AddEnvironmentVariables();
             Configuration = builder.Build();
         }
-        
+
         public void ConfigureServices(IServiceCollection services)
         {
-            if (Environment.IsEnvironment("Test"))
+            if (Environment.IsTest())
             {
                 services.AddDbContext<ElronContext>(opt => opt.UseInMemoryDatabase("Elron"));
                 services.AddDbContext<PeatusContext>(opt => opt.UseInMemoryDatabase("Peatus"));
@@ -39,7 +46,11 @@ namespace ElronAPI.Api
             {
                 services.AddDbContext<ElronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
                 services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
+
+                services.AddHangfire(config =>
+                    config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
             }
+
 
             services.AddMemoryCache();
 
@@ -49,6 +60,10 @@ namespace ElronAPI.Api
                     .AllowAnyMethod()
                     .AllowAnyHeader();
             }));
+
+            services.AddSession();
+
+            services.AddHttpClient();
 
             services.AddMvc().AddJsonOptions(options =>
             {
@@ -61,8 +76,26 @@ namespace ElronAPI.Api
         {
             loggerFactory.AddConsole().AddDebug();
 
+            app.UseSession();
+
+            if (!Environment.IsTest())
+            {
+                app.UseHangfireServer();
+                app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+                {
+                    Authorization = new[] {new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey"))}
+                });
+                
+                ConfigureHangfireJobs();
+            }
+
             app.UseCors("AllowAllPolicy");
             app.UseMvc();
+        }
+
+        private static void ConfigureHangfireJobs()
+        {
+            RecurringJob.AddOrUpdate<GtfsImport>("gtfs-import", x => x.WorkAsync(), "0 1 */4 * *");
         }
     }
 }

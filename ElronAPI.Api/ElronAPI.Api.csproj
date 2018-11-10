@@ -7,6 +7,11 @@
 
   <ItemGroup>
     <PackageReference Include="AngleSharp" Version="0.9.10" />
+    <PackageReference Include="CsvHelper" Version="8.3.0" />
+    <PackageReference Include="Hangfire" Version="1.6.21" />
+    <PackageReference Include="Hangfire.AspNetCore" Version="1.6.21" />
+    <PackageReference Include="Hangfire.Dashboard.Authorization" Version="2.1.0" />
+    <PackageReference Include="Hangfire.PostgreSql" Version="1.5.0" />
     <PackageReference Include="Microsoft.ApplicationInsights.AspNetCore" Version="2.4.0" />
     <PackageReference Include="Microsoft.AspNetCore" Version="2.1.2" />
     <PackageReference Include="Microsoft.AspNetCore.HttpsPolicy" Version="2.1.1" />
@@ -17,11 +22,14 @@
     <PackageReference Include="Microsoft.EntityFrameworkCore.InMemory" Version="2.1.1" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="2.1.0" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Tools" Version="2.1.1" />
+    <PackageReference Include="Microsoft.Extensions.Http" Version="2.1.1" />
     <PackageReference Include="Microsoft.Extensions.Logging.Debug" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.BrowserLink" Version="2.1.1" />
     <PackageReference Include="Microsoft.VisualStudio.Web.CodeGeneration.Design" Version="2.1.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL" Version="2.1.1.1" />
     <PackageReference Include="Npgsql.EntityFrameworkCore.PostgreSQL.Design" Version="1.1.1" />
+    <PackageReference Include="Otp.NET" Version="1.2.1" />
+    <PackageReference Include="PostgreSQLCopyHelper" Version="2.4.0" />
   </ItemGroup>
 
   <ItemGroup>

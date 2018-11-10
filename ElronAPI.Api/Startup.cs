@@ -95,7 +95,7 @@ namespace ElronAPI.Api
 
         private static void ConfigureHangfireJobs()
         {
-            //RecurringJob.AddOrUpdate<GtfsImport>("gtfs-import", x => x.WorkAsync(), "0 1 */4 * *");
+            RecurringJob.AddOrUpdate<GtfsImport>("gtfs-import", x => x.WorkAsync(), "0 1 */4 * *");
         }
     }
 }

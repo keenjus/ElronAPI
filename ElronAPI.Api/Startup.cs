@@ -1,3 +1,5 @@
+using System;
+using System.Threading.Tasks;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Extensions;
 using ElronAPI.Api.Hangfire;
@@ -45,7 +47,8 @@ namespace ElronAPI.Api
                 services.AddDbContext<ElronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
                 services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
 
-                services.AddHangfire(config => config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
+                services.AddHangfire(config =>
+                    config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
             }
 
 
@@ -59,6 +62,8 @@ namespace ElronAPI.Api
             }));
 
             services.AddSession();
+
+            services.AddHttpClient();
 
             services.AddMvc().AddJsonOptions(options =>
             {
@@ -78,12 +83,19 @@ namespace ElronAPI.Api
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/hangfire", new DashboardOptions()
                 {
-                    Authorization = new[] { new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey")) }
+                    Authorization = new[] {new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey"))}
                 });
             }
 
+            ConfigureHangfireJobs();
+
             app.UseCors("AllowAllPolicy");
             app.UseMvc();
+        }
+
+        private static void ConfigureHangfireJobs()
+        {
+            //RecurringJob.AddOrUpdate<GtfsImport>("gtfs-import", x => x.WorkAsync(), "0 1 */4 * *");
         }
     }
 }

@@ -8,6 +8,8 @@ GTFS data is pulled from https://peatus.ee/gtfs.
 
 An automated import script is located in `gtfs/`
 
+As of 2018-11-10 The import is automated with Hangfire jobs
+
 # Database Scaffolding
 Modify the connectionstring if needed:
 

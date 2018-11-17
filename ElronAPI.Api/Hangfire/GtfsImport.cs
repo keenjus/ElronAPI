@@ -1,14 +1,15 @@
-using System;
-using System.Collections.Generic;
-using System.IO;
-using System.IO.Compression;
-using System.Net.Http;
-using System.Threading.Tasks;
 using CsvHelper;
 using CsvHelper.Configuration;
 using Microsoft.Extensions.Configuration;
 using Npgsql;
 using PostgreSQLCopyHelper;
+using System;
+using System.Collections.Generic;
+using System.Globalization;
+using System.IO;
+using System.IO.Compression;
+using System.Net.Http;
+using System.Threading.Tasks;
 
 namespace ElronAPI.Api.Hangfire
 {
@@ -173,6 +174,7 @@ namespace ElronAPI.Api.Hangfire
             {
                 using (var csvReader = new CsvReader(textReader))
                 {
+                    csvReader.Configuration.CultureInfo = CultureInfo.InvariantCulture;
                     configureReader?.Invoke(csvReader);
 
                     var items = csvReader.GetRecords<T>();

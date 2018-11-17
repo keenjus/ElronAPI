@@ -1,40 +1,59 @@
-using ElronAPI.Api.Models;
+using ElronAPI.Application.TrainTime.Queries;
+using ElronAPI.Data.Models;
 using ElronAPI.Domain.Classifiers;
 using ElronAPI.Domain.Extensions;
 using ElronAPI.Domain.Helpers;
+using FluentValidation;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.Extensions.Logging;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using System.Net;
 using System.Threading.Tasks;
-using ElronAPI.Data.Models;
 
 namespace ElronAPI.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class TrainTimesController : Controller
+    public class TrainTimesController : BaseController
     {
         private readonly PeatusContext _dbContext;
         private readonly IMemoryCache _memoryCache;
+        private readonly ILogger<TrainTimesController> _logger;
 
-        public TrainTimesController(PeatusContext dbContext, IMemoryCache memoryCache)
+        public TrainTimesController(PeatusContext dbContext, IMemoryCache memoryCache,
+            ILogger<TrainTimesController> logger)
         {
             _dbContext = dbContext;
             _memoryCache = memoryCache;
+            _logger = logger;
         }
 
         [HttpGet]
         public async Task<IActionResult> Index(string origin, string destination, bool all = false)
         {
-            if (!string.IsNullOrWhiteSpace(origin) && !string.IsNullOrWhiteSpace(destination))
-                return Json(await GetTrainTimes(origin, destination, all));
+            try
+            {
+                var query = new TrainTimesQuery() { Origin = origin, Destination = destination, All = all };
+                var response = await Mediator.Send(query);
 
-            Response.StatusCode = 400;
-            return Json(new JsonErrorResponseModel { Error = true, Message = "Missing parameters" });
+                return Json(response);
+            }
+            catch (ValidationException ex)
+            {
+                Response.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
+                return Content(ex.Message, "text/plain");
+            }
+            catch (Exception ex)
+            {
+                _logger.LogError(ex, "Unhandled exception");
+
+                Response.StatusCode = (int)HttpStatusCode.InternalServerError;
+                return Content(ex.Message, "text/plain");
+            }
         }
-
 
         [HttpGet("lastimport")]
         public async Task<IActionResult> LastImport()
@@ -70,92 +89,6 @@ namespace ElronAPI.Api.Controllers
                 });
 
             return Json(trainStops);
-        }
-
-        private async Task<List<TrainTimeModel>> GetTrainTimes(string origin, string destination, bool all = false)
-        {
-            string originLowerCase = origin.ToLower();
-            string destinationLowerCase = destination.ToLower();
-
-            var traintimes = await _memoryCache.GetOrCreateAsync(
-                CacheKeyHelper.GetTrainTimesCacheKey(origin, destination),
-                async entry =>
-                {
-                    var nowEstonian = DateTimeHelper.NowEstonian();
-
-                    entry.AbsoluteExpirationRelativeToNow = DateTimeHelper.TimeUntilMidnight(nowEstonian);
-
-                    var times = await (from originStopTime in _dbContext.StopTimes
-                                       join destinationStopTime in _dbContext.StopTimes
-                                           on originStopTime.TripId equals destinationStopTime.TripId
-                                       where (originStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id &&
-                                              destinationStopTime.Trip.Route.AgencyId == AgencyType.Elron.Id) &&
-                                             (originStopTime.Stop.StopName.ToLower() == originLowerCase &&
-                                              destinationStopTime.Stop.StopName.ToLower() == destinationLowerCase) &&
-                                             originStopTime.StopSequence < destinationStopTime.StopSequence
-                                       select new TrainTimeModel
-                                       {
-                                           ServiceId = destinationStopTime.Trip.ServiceId,
-                                           RouteLongName = originStopTime.Trip.Route.RouteLongName,
-                                           RouteShortName = originStopTime.Trip.Route.RouteShortName,
-                                           Start = originStopTime.DepartureTime,
-                                           End = destinationStopTime.ArrivalTime
-                                       }).OrderBy(o => o.Start).ToListAsync();
-
-                    var calendarList = await (from calendar in _dbContext.Calendar
-                                              join serviceId in times.Select(t => t.ServiceId) on calendar.ServiceId equals serviceId
-                                              select calendar).ToListAsync();
-
-                    for (int i = times.Count - 1; i >= 0; i--)
-                    {
-                        var time = times[i];
-                        var calendar = calendarList.FirstOrDefault(c => c.ServiceId == time.ServiceId);
-
-                        if (calendar == null) continue;
-
-                        if (!StopExistsOnDay(nowEstonian.DayOfWeek, calendar))
-                        {
-                            times.RemoveAt(i);
-                            continue;
-                        }
-
-                        if ((nowEstonian.Date < calendar.StartDate || nowEstonian > new DateTime(calendar.EndDate.Year,
-                                 calendar.EndDate.Month, calendar.EndDate.Day, 23, 59, 59)))
-                        {
-                            times.RemoveAt(i);
-                        }
-                    }
-
-                    return times;
-                });
-
-            if (all) return traintimes;
-
-            var timeOfDay = DateTimeHelper.NowEstonian().TimeOfDay;
-            return traintimes.Where(o => TimeSpan.Parse(o.Start) > timeOfDay).ToList();
-        }
-
-        private static bool StopExistsOnDay(DayOfWeek day, Calendar calendar)
-        {
-            switch (day)
-            {
-                case DayOfWeek.Monday:
-                    return calendar.Monday;
-                case DayOfWeek.Tuesday:
-                    return calendar.Tuesday;
-                case DayOfWeek.Wednesday:
-                    return calendar.Wednesday;
-                case DayOfWeek.Thursday:
-                    return calendar.Thursday;
-                case DayOfWeek.Friday:
-                    return calendar.Friday;
-                case DayOfWeek.Saturday:
-                    return calendar.Saturday;
-                case DayOfWeek.Sunday:
-                    return calendar.Sunday;
-                default:
-                    return false;
-            }
         }
     }
 }

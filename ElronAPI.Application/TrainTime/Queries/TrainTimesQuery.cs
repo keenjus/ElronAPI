@@ -8,5 +8,7 @@ namespace ElronAPI.Application.TrainTime.Queries
     {
         public string Origin { get; set; }
         public string Destination { get; set; }
+
+        public bool All { get; set; }
     }
 }

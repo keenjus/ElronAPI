@@ -31,7 +31,7 @@ namespace ElronAPI.Api.Controllers
             }
             catch (ValidationException ex)
             {
-                Response.StatusCode = (int)HttpStatusCode.BadRequest;
+                Response.StatusCode = (int)HttpStatusCode.UnprocessableEntity;
                 return Content(ex.Message, "text/plain");
             }
             catch (ScrapeException ex)

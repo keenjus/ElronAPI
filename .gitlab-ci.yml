@@ -37,6 +37,7 @@ deploy_gcloud:
   when: manual
   only:
     - master
+    - dev
   script:
     - echo $DEPLOY_KEY_FILE > /tmp/$CI_PIPELINE_ID.json
     - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json

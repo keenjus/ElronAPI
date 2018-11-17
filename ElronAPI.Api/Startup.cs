@@ -55,6 +55,7 @@ namespace ElronAPI.Api
 
 
             services.AddMemoryCache();
+            services.AddHttpClient();
 
             services.AddScoped<ServiceFactory>(p => p.GetService);
 

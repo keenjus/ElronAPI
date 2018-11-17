@@ -8,6 +8,7 @@ using Microsoft.AspNetCore.TestHost;
 using Newtonsoft.Json;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
+using ElronAPI.Domain.Models;
 using Xunit;
 
 namespace ElronAPI.Tests

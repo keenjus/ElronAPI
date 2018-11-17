@@ -1,6 +1,7 @@
 ﻿using AngleSharp.Parser.Html;
 using ElronAPI.Domain.Exceptions;
 using ElronAPI.Domain.Helpers;
+using ElronAPI.Domain.Models;
 using MediatR;
 using Microsoft.Extensions.Caching.Memory;
 using System;
@@ -9,7 +10,6 @@ using System.Linq;
 using System.Net.Http;
 using System.Threading;
 using System.Threading.Tasks;
-using ElronAPI.Domain.Models;
 
 namespace ElronAPI.Application.ElronAccount.Queries
 {
@@ -32,6 +32,10 @@ namespace ElronAPI.Application.ElronAccount.Queries
             {
                 // cache the account object for 15minutes
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
+
+                // Manual log out because IHttpClientFactory keeps cookies...
+                // TODO Force clear cookies?
+                await _httpClient.GetAsync(new Uri(ElronBaseUri, "/Account/LogOff"), cancellationToken);
 
                 await _httpClient.GetAsync(new Uri(ElronBaseUri, $"/Account/Login?cardNumber={request.Id}"), cancellationToken);
                 var result = await _httpClient.GetAsync(new Uri(ElronBaseUri, "/Account/Statement?allTransactions=True"), cancellationToken);

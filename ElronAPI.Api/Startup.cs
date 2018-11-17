@@ -30,6 +30,8 @@ namespace ElronAPI.Api
         private static IConfiguration Configuration { get; set; }
         private static IHostingEnvironment Environment { get; set; }
 
+        private static bool EnableHangfire => !(bool.TryParse(Configuration["DisableHangfire"], out bool parsed) && parsed);
+
         public Startup(IHostingEnvironment env)
         {
             var builder = new ConfigurationBuilder()
@@ -46,8 +48,11 @@ namespace ElronAPI.Api
                 services.AddDbContext<ElronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
                 services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
 
-                services.AddHangfire(config =>
-                    config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
+                if (EnableHangfire)
+                {
+                    services.AddHangfire(config =>
+                        config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
+                }
             }
             else
             {
@@ -90,7 +95,7 @@ namespace ElronAPI.Api
 
             app.UseSession();
 
-            if (Environment.IsTest() == false)
+            if (Environment.IsTest() == false && EnableHangfire)
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/hangfire", new DashboardOptions()

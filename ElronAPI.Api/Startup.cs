@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using ElronAPI.Application.Behaviors;
 using FluentValidation.AspNetCore;
 
 namespace ElronAPI.Api
@@ -40,12 +41,7 @@ namespace ElronAPI.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            if (true)
-            {
-                services.AddDbContext<ElronContext>(opt => opt.UseInMemoryDatabase("Elron"));
-                services.AddDbContext<PeatusContext>(opt => opt.UseInMemoryDatabase("Peatus"));
-            }
-            else
+            if (Environment.IsTest() == false)
             {
                 services.AddDbContext<ElronContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Elron")));
                 services.AddDbContext<PeatusContext>(opt => opt.UseNpgsql(Configuration.GetConnectionString("Peatus")));
@@ -53,7 +49,11 @@ namespace ElronAPI.Api
                 services.AddHangfire(config =>
                     config.UsePostgreSqlStorage(Configuration.GetConnectionString("Peatus")));
             }
-
+            else
+            {
+                services.AddDbContext<ElronContext>(opt => opt.UseInMemoryDatabase("Elron"));
+                services.AddDbContext<PeatusContext>(opt => opt.UseInMemoryDatabase("Peatus"));
+            }
 
             services.AddMemoryCache();
             services.AddHttpClient();
@@ -62,6 +62,7 @@ namespace ElronAPI.Api
 
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
             services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestValidationBehavior<,>));
 
             services.AddMediatR(typeof(ElronAccountQuery).GetTypeInfo().Assembly);
 
@@ -89,7 +90,7 @@ namespace ElronAPI.Api
 
             app.UseSession();
 
-            if (false)
+            if (Environment.IsTest() == false)
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/hangfire", new DashboardOptions()

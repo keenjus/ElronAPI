@@ -2,7 +2,7 @@ namespace ElronAPI.Domain.Classifiers
 {
     public class AgencyType
     {
-        public int Id { get; private set; }
+        public int Id { get; }
 
         private AgencyType(int id)
         {

@@ -1,35 +1,34 @@
+using ElronAPI.Api;
+using ElronAPI.Api.Models;
+using ElronAPI.Domain.Models;
+using Microsoft.AspNetCore.Hosting;
+using Microsoft.AspNetCore.TestHost;
+using Newtonsoft.Json;
 using System;
 using System.Net;
 using System.Net.Http;
 using System.Threading.Tasks;
-using ElronAPI.Api;
-using Microsoft.AspNetCore.Hosting;
-using Microsoft.AspNetCore.TestHost;
-using Newtonsoft.Json;
-using ElronAPI.Api.Data;
-using ElronAPI.Api.Models;
-using ElronAPI.Domain.Models;
 using Xunit;
 
 namespace ElronAPI.Tests
 {
     public class ApiShould : IDisposable
     {
-        public readonly TestServer Server;
-        public readonly HttpClient Client;
+        private readonly TestServer _server;
+        private readonly HttpClient _client;
 
         public ApiShould()
         {
-            Server = new TestServer(new WebHostBuilder()
+            _server = new TestServer(new WebHostBuilder()
                 .UseEnvironment("Test").UseStartup<Startup>());
 
-            Client = Server.CreateClient();
+            _client = _server.CreateClient();
         }
 
         [Fact]
         public async Task Return_TrainTimes_BadRequest()
         {
-            var response = await Client.GetAsync($"/api/traintimes?origin=&destination=&all=true");
+            var response = await _client.GetAsync($"/api/traintimes?origin=&destination=&all=true");
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -45,7 +44,7 @@ namespace ElronAPI.Tests
         {
             string cardNumber = "92000153082";
 
-            var response = await Client.GetAsync($"/api/elronaccount/{cardNumber}");
+            var response = await _client.GetAsync($"/api/elronaccount/{cardNumber}");
 
             response.EnsureSuccessStatusCode();
 
@@ -67,7 +66,7 @@ namespace ElronAPI.Tests
         {
             string cardNumber = "920001653082";
 
-            var response = await Client.GetAsync($"/api/elronaccount/getaccount?id={cardNumber}");
+            var response = await _client.GetAsync($"/api/elronaccount/getaccount?id={cardNumber}");
 
             Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
 
@@ -81,7 +80,7 @@ namespace ElronAPI.Tests
         [Fact]
         public async Task Return_Error_If_No_Account_Specified()
         {
-            var response = await Client.GetAsync("/api/elronaccount/");
+            var response = await _client.GetAsync("/api/elronaccount/");
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
 
@@ -95,8 +94,8 @@ namespace ElronAPI.Tests
 
         public void Dispose()
         {
-            Server?.Dispose();
-            Client?.Dispose();
+            _server?.Dispose();
+            _client?.Dispose();
         }
     }
 }

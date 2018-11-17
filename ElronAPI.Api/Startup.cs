@@ -1,7 +1,9 @@
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Extensions;
 using ElronAPI.Api.Hangfire;
+using ElronAPI.Application.Behaviors;
 using ElronAPI.Application.ElronAccount.Queries;
+using FluentValidation.AspNetCore;
 using Hangfire;
 using Hangfire.PostgreSql;
 using MediatR;
@@ -13,9 +15,9 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
+using NLog;
+using NLog.Extensions.Logging;
 using System.Reflection;
-using ElronAPI.Application.Behaviors;
-using FluentValidation.AspNetCore;
 
 namespace ElronAPI.Api
 {
@@ -91,20 +93,24 @@ namespace ElronAPI.Api
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
         {
-            loggerFactory.AddConsole().AddDebug();
+            if (Environment.IsTest() == false)
+            {
+                GlobalDiagnosticsContext.Set("connectionString", Configuration.GetConnectionString("Elron"));
+                loggerFactory.AddNLog().AddConsole().AddDebug();
+
+                if (EnableHangfire)
+                {
+                    app.UseHangfireServer();
+                    app.UseHangfireDashboard("/hangfire", new DashboardOptions()
+                    {
+                        Authorization = new[] { new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey")) }
+                    });
+
+                    ConfigureHangfireJobs();
+                }
+            }
 
             app.UseSession();
-
-            if (Environment.IsTest() == false && EnableHangfire)
-            {
-                app.UseHangfireServer();
-                app.UseHangfireDashboard("/hangfire", new DashboardOptions()
-                {
-                    Authorization = new[] { new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey")) }
-                });
-
-                ConfigureHangfireJobs();
-            }
 
             app.UseCors("AllowAllPolicy");
             app.UseMvc();

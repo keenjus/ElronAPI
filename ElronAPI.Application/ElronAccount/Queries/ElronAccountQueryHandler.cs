@@ -18,12 +18,10 @@ namespace ElronAPI.Application.ElronAccount.Queries
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _memoryCache;
 
-        private static readonly Uri ElronBaseUri = new Uri("https://pilet.elron.ee/");
-
         public ElronAccountQueryHandler(IHttpClientFactory factory, IMemoryCache memoryCache)
         {
             _memoryCache = memoryCache;
-            _httpClient = factory.CreateClient();
+            _httpClient = factory.CreateClient("Elron");
         }
 
         public async Task<ElronAccountModel> Handle(ElronAccountQuery request, CancellationToken cancellationToken)
@@ -33,12 +31,8 @@ namespace ElronAPI.Application.ElronAccount.Queries
                 // cache the account object for 15minutes
                 entry.AbsoluteExpirationRelativeToNow = TimeSpan.FromMinutes(15);
 
-                // Manual log out because IHttpClientFactory keeps cookies...
-                // TODO Force clear cookies?
-                await _httpClient.GetAsync(new Uri(ElronBaseUri, "/Account/LogOff"), cancellationToken);
-
-                await _httpClient.GetAsync(new Uri(ElronBaseUri, $"/Account/Login?cardNumber={request.Id}"), cancellationToken);
-                var result = await _httpClient.GetAsync(new Uri(ElronBaseUri, "/Account/Statement?allTransactions=True"), cancellationToken);
+                var message = new HttpRequestMessage(HttpMethod.Get, $"/Account/Login?cardNumber={request.Id}&ReturnUrl=%2fAccount%2fStatement%3fallTransactions%3dTrue");
+                var result = await _httpClient.SendAsync(message, cancellationToken);
 
                 result.EnsureSuccessStatusCode();
 
@@ -93,7 +87,7 @@ namespace ElronAPI.Application.ElronAccount.Queries
                     {
                         Id = ticketGuid,
                         Number = ticketNode.TextContent.Trim(),
-                        Url = new Uri(ElronBaseUri, tickerNodeHref).AbsoluteUri
+                        Url = new Uri(_httpClient.BaseAddress, tickerNodeHref).AbsoluteUri
                     };
 
                     transaction.Ticket = ticket;

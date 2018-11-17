@@ -17,6 +17,7 @@ using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using NLog;
 using NLog.Extensions.Logging;
+using System;
 using System.Reflection;
 
 namespace ElronAPI.Api
@@ -83,7 +84,7 @@ namespace ElronAPI.Api
 
             services.AddSession();
 
-            services.AddHttpClient();
+            services.AddHttpClient("Elron", opts => { opts.BaseAddress = new Uri("https://pilet.elron.ee/"); });
 
             services.AddMvc().AddJsonOptions(options =>
             {

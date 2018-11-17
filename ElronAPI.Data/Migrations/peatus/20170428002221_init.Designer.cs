@@ -1,11 +1,11 @@
-﻿using System;
-using ElronAPI.Api.Data;
+﻿using ElronAPI.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
+using System;
 
-namespace ElronAPI.Api.Migrations.peatus
+namespace ElronAPI.Data.Migrations.peatus
 {
     [DbContext(typeof(PeatusContext))]
     [Migration("20170428002221_init")]

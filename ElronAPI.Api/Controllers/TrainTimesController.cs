@@ -1,4 +1,3 @@
-using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using ElronAPI.Domain.Classifiers;
 using ElronAPI.Domain.Extensions;
@@ -10,6 +9,7 @@ using System;
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using ElronAPI.Data.Models;
 
 namespace ElronAPI.Api.Controllers
 {

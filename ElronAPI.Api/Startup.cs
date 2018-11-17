@@ -1,4 +1,3 @@
-using ElronAPI.Api.Data;
 using ElronAPI.Api.Extensions;
 using ElronAPI.Api.Hangfire;
 using ElronAPI.Application.Behaviors;
@@ -19,6 +18,7 @@ using NLog;
 using NLog.Extensions.Logging;
 using System;
 using System.Reflection;
+using ElronAPI.Data.Models;
 
 namespace ElronAPI.Api
 {

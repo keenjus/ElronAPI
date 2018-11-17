@@ -1,4 +1,3 @@
-using ElronAPI.Api.Data;
 using ElronAPI.Application.ElronAccount.Queries;
 using ElronAPI.Domain.Exceptions;
 using FluentValidation;

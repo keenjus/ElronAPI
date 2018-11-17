@@ -1,7 +1,7 @@
 ﻿using System;
 using Microsoft.EntityFrameworkCore.Migrations;
 
-namespace ElronAPI.Api.Migrations.peatus
+namespace ElronAPI.Data.Migrations.peatus
 {
     public partial class init : Migration
     {

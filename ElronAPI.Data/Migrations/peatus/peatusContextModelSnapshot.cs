@@ -1,10 +1,10 @@
 ﻿using System;
-using ElronAPI.Api.Data;
+using ElronAPI.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace ElronAPI.Api.Migrations.peatus
+namespace ElronAPI.Data.Migrations.peatus
 {
     [DbContext(typeof(PeatusContext))]
     partial class peatusContextModelSnapshot : ModelSnapshot

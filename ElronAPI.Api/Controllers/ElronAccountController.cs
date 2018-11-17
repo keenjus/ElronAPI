@@ -2,23 +2,14 @@ using ElronAPI.Api.Data;
 using ElronAPI.Api.Models;
 using ElronAPI.Application.ElronAccount.Queries;
 using ElronAPI.Domain.Exceptions;
-using MediatR;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Tasks;
 
 namespace ElronAPI.Api.Controllers
 {
     [Route("api/[controller]")]
-    public class ElronAccountController : Controller
+    public class ElronAccountController : BaseController
     {
-        private readonly IMediator _mediator;
-
-
-        public ElronAccountController(IMediator mediator)
-        {
-            _mediator = mediator;
-        }
-
         [HttpGet]
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
@@ -32,7 +23,7 @@ namespace ElronAPI.Api.Controllers
             try
             {
                 var query = new ElronAccountQuery() { Id = id };
-                return Json(await _mediator.Send(query));
+                return Json(await Mediator.Send(query));
             }
             catch (ScrapeException ex)
             {

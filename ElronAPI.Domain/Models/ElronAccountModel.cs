@@ -1,9 +1,9 @@
-using Newtonsoft.Json;
 using System;
 using System.Collections.Generic;
 using System.Linq;
+using Newtonsoft.Json;
 
-namespace ElronAPI.Api.Models
+namespace ElronAPI.Domain.Models
 {
     public class ElronAccountModel
     {
@@ -14,10 +14,13 @@ namespace ElronAPI.Api.Models
 
         public string Id { get; set; }
         public decimal? Balance { get; set; }
+
         [JsonIgnore]
         public int? PeriodTicketThreshold { get; set; }
+
         [JsonIgnore]
         public decimal? BalanceThreshold { get; set; }
+
         public DateTime LastCheck { get; set; }
         public IEnumerable<PeriodTicket> PeriodTickets => Transactions.Where(x => x.PeriodTicket != null).Select(x => x.PeriodTicket).ToList();
         public List<Transaction> Transactions { get; set; }

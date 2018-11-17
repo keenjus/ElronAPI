@@ -68,13 +68,7 @@ namespace ElronAPI.Tests
 
             var response = await _client.GetAsync($"/api/elronaccount/getaccount?id={cardNumber}");
 
-            Assert.Equal(HttpStatusCode.InternalServerError, response.StatusCode);
-
-            string responseString = await response.Content.ReadAsStringAsync();
-
-            var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
-
-            Assert.True(responseObject.Error);
+            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
         }
 
         [Fact]
@@ -83,13 +77,6 @@ namespace ElronAPI.Tests
             var response = await _client.GetAsync("/api/elronaccount/");
 
             Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            string responseString = await response.Content.ReadAsStringAsync();
-
-
-            var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
-
-            Assert.True(responseObject.Error);
         }
 
         public void Dispose()

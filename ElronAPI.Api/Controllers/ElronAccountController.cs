@@ -14,15 +14,18 @@ namespace ElronAPI.Api.Controllers
         [HttpGet("{id}")]
         public async Task<IActionResult> GetById(string id)
         {
-            if (string.IsNullOrWhiteSpace(id))
+            var query = new ElronAccountQuery() { Id = id };
+
+            var validator = new ElronAccountQueryValidator();
+            var validationResult = await validator.ValidateAsync(query);
+
+            if (validationResult.IsValid == false)
             {
-                Response.StatusCode = 400;
-                return Json(new JsonErrorResponseModel { Error = true, Message = "Card number not specified or is null" });
+                return BadRequest(validationResult.Errors);
             }
 
             try
             {
-                var query = new ElronAccountQuery() { Id = id };
                 return Json(await Mediator.Send(query));
             }
             catch (ScrapeException ex)

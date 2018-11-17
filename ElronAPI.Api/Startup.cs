@@ -14,6 +14,7 @@ using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
 using System.Reflection;
+using FluentValidation.AspNetCore;
 
 namespace ElronAPI.Api
 {
@@ -39,7 +40,7 @@ namespace ElronAPI.Api
 
         public void ConfigureServices(IServiceCollection services)
         {
-            if (Environment.IsTest())
+            if (true)
             {
                 services.AddDbContext<ElronContext>(opt => opt.UseInMemoryDatabase("Elron"));
                 services.AddDbContext<PeatusContext>(opt => opt.UseInMemoryDatabase("Peatus"));
@@ -79,7 +80,7 @@ namespace ElronAPI.Api
             {
                 options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
                 options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            });
+            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ElronAccountQueryValidator>());
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)
@@ -88,7 +89,7 @@ namespace ElronAPI.Api
 
             app.UseSession();
 
-            if (!Environment.IsTest())
+            if (false)
             {
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/hangfire", new DashboardOptions()

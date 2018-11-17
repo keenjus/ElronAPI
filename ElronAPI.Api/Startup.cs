@@ -1,10 +1,11 @@
-using System;
-using System.Threading.Tasks;
 using ElronAPI.Api.Data;
 using ElronAPI.Api.Extensions;
 using ElronAPI.Api.Hangfire;
+using ElronAPI.Application.ElronAccount.Queries;
 using Hangfire;
 using Hangfire.PostgreSql;
+using MediatR;
+using MediatR.Pipeline;
 using Microsoft.AspNetCore.Builder;
 using Microsoft.AspNetCore.Hosting;
 using Microsoft.EntityFrameworkCore;
@@ -12,6 +13,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Logging;
 using Newtonsoft.Json.Serialization;
+using System.Reflection;
 
 namespace ElronAPI.Api
 {
@@ -54,6 +56,13 @@ namespace ElronAPI.Api
 
             services.AddMemoryCache();
 
+            services.AddScoped<ServiceFactory>(p => p.GetService);
+
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPreProcessorBehavior<,>));
+            services.AddScoped(typeof(IPipelineBehavior<,>), typeof(RequestPostProcessorBehavior<,>));
+
+            services.AddMediatR(typeof(ElronAccountQuery).GetTypeInfo().Assembly);
+
             services.AddCors(o => o.AddPolicy("AllowAllPolicy", builder =>
             {
                 builder.AllowAnyOrigin()
@@ -83,9 +92,9 @@ namespace ElronAPI.Api
                 app.UseHangfireServer();
                 app.UseHangfireDashboard("/hangfire", new DashboardOptions()
                 {
-                    Authorization = new[] {new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey"))}
+                    Authorization = new[] { new TotpAuthorizationFilter(Configuration.GetValue<string>("TotpKey")) }
                 });
-                
+
                 ConfigureHangfireJobs();
             }
 

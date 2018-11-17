@@ -10,6 +10,8 @@ using System.Globalization;
 using System.Linq;
 using System.Net.Http;
 using System.Threading.Tasks;
+using ElronAPI.Application.ElronAccount.Queries;
+using MediatR;
 
 namespace ElronAPI.Api.Controllers
 {
@@ -18,13 +20,15 @@ namespace ElronAPI.Api.Controllers
     {
         private readonly HttpClient _httpClient;
         private readonly IMemoryCache _memoryCache;
+        private readonly IMediator _mediator;
 
         private static readonly Uri ElronBaseUri = new Uri("https://pilet.elron.ee/");
 
-        public ElronAccountController(IMemoryCache memoryCache)
+        public ElronAccountController(IMemoryCache memoryCache, IMediator mediator)
         {
             _httpClient = new HttpClient();
             _memoryCache = memoryCache;
+            _mediator = mediator;
         }
 
         [HttpGet]

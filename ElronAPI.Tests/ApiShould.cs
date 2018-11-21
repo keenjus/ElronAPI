@@ -84,13 +84,13 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
-        public async Task Return_BadRequest_If_Invalid_Account()
+        public async Task Return_NotFound_If_Invalid_Account()
         {
             string cardNumber = "1212121212121";
 
             var response = await _client.GetAsync($"/api/elronaccount/{cardNumber}");
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         public void Dispose()

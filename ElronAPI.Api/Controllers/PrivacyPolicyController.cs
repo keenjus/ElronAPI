@@ -4,7 +4,7 @@ using Microsoft.Extensions.Logging;
 namespace ElronAPI.Api.Controllers
 {
     [Route("privacy")]
-    public class PrivacyPolicyController : Controller
+    public class PrivacyPolicyController : BaseController
     {
         private readonly ILogger<PrivacyPolicyController> _logger;
 

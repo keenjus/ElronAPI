@@ -18,6 +18,8 @@ using NLog;
 using NLog.Extensions.Logging;
 using System;
 using System.Reflection;
+using ElronAPI.Api.Controllers;
+using ElronAPI.Api.Filters;
 using ElronAPI.Data.Models;
 
 namespace ElronAPI.Api
@@ -86,11 +88,14 @@ namespace ElronAPI.Api
 
             services.AddHttpClient("Elron", opts => { opts.BaseAddress = new Uri("https://pilet.elron.ee/"); });
 
-            services.AddMvc().AddJsonOptions(options =>
-            {
-                options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
-                options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
-            }).AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ElronAccountQueryValidator>());
+            services
+                .AddMvc(opts => opts.Filters.Add(typeof(CustomExceptionFilterAttribute)))
+                .AddJsonOptions(options =>
+                {
+                    options.SerializerSettings.Formatting = Newtonsoft.Json.Formatting.None;
+                    options.SerializerSettings.ContractResolver = new CamelCasePropertyNamesContractResolver();
+                })
+                .AddFluentValidation(fv => fv.RegisterValidatorsFromAssemblyContaining<ElronAccountQueryValidator>());
         }
 
         public void Configure(IApplicationBuilder app, ILoggerFactory loggerFactory)

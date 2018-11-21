@@ -1,7 +1,6 @@
 ﻿using System;
-using System.Collections.Generic;
 
-namespace ElronAPI.Api.Data
+namespace ElronAPI.Data.Models
 {
     public partial class ImportLog
     {

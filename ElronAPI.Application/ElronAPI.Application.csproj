@@ -16,6 +16,7 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\ElronAPI.Data\ElronAPI.Data.csproj" />
     <ProjectReference Include="..\ElronAPI.Domain\ElronAPI.Domain.csproj" />
   </ItemGroup>
 

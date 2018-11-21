@@ -30,13 +30,7 @@ namespace ElronAPI.Tests
         {
             var response = await _client.GetAsync($"/api/traintimes?origin=&destination=&all=true");
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
-
-            string responseString = await response.Content.ReadAsStringAsync();
-
-            var responseObject = JsonConvert.DeserializeObject<JsonErrorResponseModel>(responseString);
-
-            Assert.True(responseObject.Error);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
@@ -62,21 +56,41 @@ namespace ElronAPI.Tests
         }
 
         [Fact]
-        public async Task Return_Error_If_Invalid_Account()
+        public async Task Return_UnprocessableEntity_If_Account_Number_Too_Short()
         {
-            string cardNumber = "920001653082";
+            string cardNumber = "9200015300";
 
-            var response = await _client.GetAsync($"/api/elronaccount/getaccount?id={cardNumber}");
+            var response = await _client.GetAsync($"/api/elronaccount/{cardNumber}");
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
         }
 
         [Fact]
-        public async Task Return_Error_If_No_Account_Specified()
+        public async Task Return_UnprocessableEntity_If_Account_Number_Too_Long()
+        {
+            string cardNumber = "92000165308257413354";
+
+            var response = await _client.GetAsync($"/api/elronaccount/{cardNumber}");
+
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Return_UnprocessableEntity_If_No_Account_Specified()
         {
             var response = await _client.GetAsync("/api/elronaccount/");
 
-            Assert.Equal(HttpStatusCode.BadRequest, response.StatusCode);
+            Assert.Equal(HttpStatusCode.UnprocessableEntity, response.StatusCode);
+        }
+
+        [Fact]
+        public async Task Return_NotFound_If_Invalid_Account()
+        {
+            string cardNumber = "1212121212121";
+
+            var response = await _client.GetAsync($"/api/elronaccount/{cardNumber}");
+
+            Assert.Equal(HttpStatusCode.NotFound, response.StatusCode);
         }
 
         public void Dispose()

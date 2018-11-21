@@ -25,24 +25,3 @@ build:
     expire_in: 1 month
     paths:
       - $PROJECT_DIR/obj/App/publish/*
-
-deploy_gcloud:
-  before_script:
-    - echo "deb http://packages.cloud.google.com/apt cloud-sdk-jessie main" | tee -a /etc/apt/sources.list.d/google-cloud-sdk.list
-    - curl https://packages.cloud.google.com/apt/doc/apt-key.gpg | apt-key add -
-    - apt-get update && apt-get install google-cloud-sdk -y
-    - apt-get install jq -y
-  stage: deploy
-  environment: Development
-  when: manual
-  only:
-    - master
-  script:
-    - echo $DEPLOY_KEY_FILE > /tmp/$CI_PIPELINE_ID.json
-    - gcloud auth activate-service-account --key-file /tmp/$CI_PIPELINE_ID.json
-    - cd $PROJECT_DIR/obj/App/publish/
-    - CONNSTRING_ELRON="$CONNECTIONSTRING_ELRON" jq '.ConnectionStrings.Elron = env.CONNSTRING_ELRON' appsettings.json > temp_appsettings.json && mv temp_appsettings.json appsettings.json
-    - CONNSTRING_PEATUS="$CONNECTIONSTRING_PEATUS" jq '.ConnectionStrings.Peatus = env.CONNSTRING_PEATUS' appsettings.json > temp2_appsettings.json && mv temp2_appsettings.json appsettings.json
-    - gcloud beta app deploy app.yaml --quiet --project $PROJECT_ID
-  after_script:
-    - rm /tmp/$CI_PIPELINE_ID.json

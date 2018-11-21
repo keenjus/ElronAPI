@@ -1,17 +1,15 @@
 ﻿using System;
-using ElronAPI.Api.Data;
+using ElronAPI.Data.Models;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
-using Microsoft.EntityFrameworkCore.Migrations;
 using Npgsql.EntityFrameworkCore.PostgreSQL.Metadata;
 
-namespace ElronAPI.Api.Migrations
+namespace ElronAPI.Data.Migrations
 {
     [DbContext(typeof(ElronContext))]
-    [Migration("20170430233844_init")]
-    partial class init
+    partial class elronContextModelSnapshot : ModelSnapshot
     {
-        protected override void BuildTargetModel(ModelBuilder modelBuilder)
+        protected override void BuildModel(ModelBuilder modelBuilder)
         {
             modelBuilder
                 .HasAnnotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.SerialColumn)

@@ -13,4 +13,4 @@ As of 2018-11-10 The import is automated with Hangfire jobs
 # Database Scaffolding
 Modify the connectionstring if needed:
 
-`Scaffold-DbContext "User ID=postgres;Password=<password>;Host=localhost;Port=5432;Database=peatus;" "Npgsql.EntityFrameworkCore.PostgreSQL" -Context PeatusContext -o ./Data/ -f`
+`Scaffold-DbContext "User ID=postgres;Password=<password>;Host=localhost;Port=5431;Database=peatus;" "Npgsql.EntityFrameworkCore.PostgreSQL" -Context PeatusContext -o ./Data/ -f`

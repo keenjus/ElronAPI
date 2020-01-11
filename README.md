@@ -1,3 +1,5 @@
+# DEPRECATED SINCE ELRON IMPLEMENTED THEIR OWN API
+
 # ElronAPI
 This is a web API project that serves train times and Elron account info.
 
